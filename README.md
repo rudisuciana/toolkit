@@ -197,18 +197,18 @@ Imf7-c2cRFKeqhh2-yHmP4iMfn8q5SX4tBZWPher3C8W8D75vyxm7OR0CGtOaTsFTaH3-2TOLOefpNqm
 
 #### 📊 Analisis Pola Kunci
 
-| Kategori | Jumlah | Panjang Decoded | Format |
+| Kategori | Jumlah | Panjang Decoded (bytes) | Format |
 |---|---|---|---|
-| **Kunci Enkripsi** (API, SSL, AES, HMAC) | 7 | 32–144 bytes | Base64URL, kemungkinan AES key / HMAC key |
-| **Kredensial CIAM** (Client ID, Secret, URL, HMAC) | 6 | 48 bytes | Base64URL-encoded credential |
-| **Kunci Pembayaran Xendit** | 6 | 96 bytes | Common prefix 21 chars, differentiating suffix |
-| **App ID SDK** (MoEngage, Medallia, Optimizely, AppsFlyer) | 4 | 32–704 bytes | Base64URL-encoded identifiers |
-| **Konfigurasi Datadog** (Token, App ID, Env) | 3 | 16–48 bytes | Base64URL-encoded config |
+| **Kunci Enkripsi** (API, SSL, AES, HMAC) | 7 | 32–144 | Base64URL, kemungkinan AES key / HMAC key |
+| **Kredensial CIAM** (Client ID, Secret, URL, HMAC) | 6 | 48 | Base64URL-encoded credential |
+| **Kunci Pembayaran Xendit** | 6 | 96 | Encoded prefix 21 char (decode: 16 bytes header identik) |
+| **App ID SDK** (MoEngage, Medallia, Optimizely, AppsFlyer) | 4 | 32–704 | Base64URL-encoded identifiers |
+| **Konfigurasi Datadog** (Token, App ID, Env) | 3 | 16–48 | Base64URL-encoded config |
 
 **Temuan Penting:**
 - `getLiveChatAesEncryptionKey` dan `getEncryptionKeyAESCustomPrepaidAndPrio` mengembalikan **nilai yang identik** — kemungkinan menggunakan kunci AES yang sama
 - `getXlEnterpriseXenditKey` dan `getXlEnterpriseSelfPaidXenditKey` mengembalikan **nilai yang identik** — endpoint pembayaran yang sama
-- Semua 6 kunci Xendit memiliki **prefix 21 karakter yang sama** (`c91bb1tNs6S8HUweZt8mg`) yang decode ke 16 bytes identik — kemungkinan header/prefix umum Xendit
+- Semua 6 kunci Xendit memiliki **prefix 21 karakter encoded yang sama** (`c91bb1tNs6S8HUweZt8mg`) yang decode ke 16 bytes identik — menunjukkan shared secret component atau initialization vector bersama. **⚠️ Risiko keamanan:** kompromi satu kunci dapat memfasilitasi serangan terhadap kunci Xendit lainnya karena komponen kriptografi yang dibagi
 - `getMedalliaAppId` memiliki ukuran sangat besar (940 karakter, decode ke 704 bytes) — kemungkinan berisi konfigurasi JSON terenkripsi, bukan sekadar App ID
 - Semua nilai disimpan langsung sebagai plaintext base64url di section `.rodata` — **tidak ada enkripsi tambahan di level native**
 
