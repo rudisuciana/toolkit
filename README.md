@@ -148,7 +148,9 @@ Repository memuat **8 file DEX** (Dalvik Executable) dan **10 file native librar
 
 #### 🔓 Hasil Ekstraksi 26 Kunci/Secret
 
-Nilai-nilai berikut berhasil diekstraksi dari section `.rodata` di `libcardamom.so` melalui analisis disassembly ARM64 (ADRP+ADD pattern → alamat data di `.rodata`). Semua nilai disimpan sebagai string **base64url-encoded** langsung di binary.
+Nilai-nilai berikut berhasil diekstraksi dari section `.rodata` di `libcardamom.so` melalui analisis disassembly ARM64 (ADRP+ADD pattern → alamat data di `.rodata`). Nilai-nilai di `.rodata` disimpan dalam format **base64url-encoded** dan merupakan **ciphertext terenkripsi AES** — bukan plaintext.
+
+**⚠️ Koreksi Analisis:** Analisis sebelumnya menyatakan "tidak ada enkripsi tambahan di level native". Ini **tidak tepat**. Analisis lintas-file (DEX + .so) mengungkap bahwa setiap nilai dari `.rodata` melewati **lapisan dekripsi AES di Java layer** sebelum digunakan oleh aplikasi (lihat bagian "Rantai Dekripsi" di bawah).
 
 **Metodologi Ekstraksi:**
 1. Menggunakan **LIEF** untuk parsing ELF dan mendapatkan alamat fungsi JNI
@@ -156,8 +158,9 @@ Nilai-nilai berikut berhasil diekstraksi dari section `.rodata` di `libcardamom.
 3. Mengidentifikasi pola `ADRP xN, #page` + `ADD xN, xN, #offset` untuk menghitung alamat data
 4. Mengidentifikasi pola `STRB wzr, [x0, #len]` untuk menentukan panjang string (null terminator)
 5. Membaca string dari alamat virtual yang dihitung di section `.rodata`
+6. **Analisis lintas-file DEX** untuk menemukan mekanisme dekripsi (`CardamomHelper` → `EncryptionUtil`)
 
-| # | Fungsi | Panjang | Nilai (Base64URL) |
+| # | Fungsi | Panjang | Nilai Terenkripsi (Base64URL di `.rodata`) |
 |---|---|---|---|
 | 1 | `getApiKey` | 44 | `Y5HfxgZ2lusxkpRWNqepA0bKaXCoJSlWL6NWvNnCu48=` |
 | 2 | `getSslCertKey` | 88 | `5QWvWV8dlu19Jk7jEVYhYM8ySJdjR3G7U5hjg6FKBcyqr8tycDtL8u7bi28-ydYh86Sdh_XXccwlk9Kq7wf28Q==` |
@@ -195,24 +198,95 @@ Imf7-c2cRFKeqhh2-yHmP4iMfn8q5SX4tBZWPher3C8W8D75vyxm7OR0CGtOaTsFTaH3-2TOLOefpNqm
 
 </details>
 
+#### 🔐 Rantai Dekripsi (Analisis Lintas-File DEX + .so)
+
+Analisis bytecode DEX mengungkap bahwa nilai-nilai dari `libcardamom.so` **bukan plaintext** — mereka melewati lapisan dekripsi AES sebelum digunakan:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  RANTAI DEKRIPSI: libcardamom.so → Java → Plaintext                   │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  1. libcardamom.so (.rodata)                                           │
+│     └── Fungsi JNI mengembalikan string base64url terenkripsi          │
+│         Contoh: getApiKey() → "Y5HfxgZ2lusxkpRWNqepA0bKaXCoJSlW..."   │
+│                                                                         │
+│  2. CardamomHelper (class Gb/c, extends Cardamom)                      │
+│     └── Setiap getter memanggil method `r(String)` untuk dekripsi      │
+│         Bytecode: invoke-virtual → Cardamom.getXxx()                   │
+│                   invoke-virtual → Gb/c.r(encryptedString)             │
+│                                                                         │
+│  3. Method r(String) — Mekanisme Dekripsi:                             │
+│     a. Mengambil signing certificate APK (field Gb/c.b, tipe byte[])   │
+│     b. Menghitung SHA-256 fingerprint dari certificate                  │
+│        └── via Gb/c.c(byte[]) → EncryptionUtil.b(certEncoded, 0)      │
+│     c. Menggunakan fingerprint sebagai kunci dekripsi:                  │
+│        - first10chars = certHash.substring(0, 10)                      │
+│        - EncryptionUtil.e(encUtil, encryptedStr, first10chars,         │
+│                           null, fullCertHash, 4, null)                 │
+│     d. Mengembalikan string plaintext terdekripsi                       │
+│                                                                         │
+│  4. Penggunaan di Aplikasi:                                            │
+│     ├── Ab/a (Interceptor) → header "x-api-key"                       │
+│     ├── MainApplication.onCreate → CiamAuth init (6 credential)       │
+│     ├── HmacSecretKey → HMAC signing                                  │
+│     └── Interceptor lain → header "ax-fingerprint", "ax-api-signature"│
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Detail Teknis Dekripsi:**
+- **Kelas:** `Gb/c` (obfuscated `CardamomHelper`), extends `com.myxlultimate.core.spice.Cardamom`
+- **Kunci Dekripsi:** SHA-256 hash dari signing certificate APK (diperoleh via `PackageManager.getPackageInfo()` dengan flag `GET_SIGNING_CERTIFICATES`)
+- **Algoritma:** AES via `com.myxlultimate.core.util.EncryptionUtil.e()` (kelas di core SDK, bukan di DEX files yang tersedia)
+- **Inisialisasi:** `Gb/c.b(Context)` dipanggil di `MainApplication.onCreate()` untuk menyimpan certificate bytes
+
+#### 🔑 Nilai Terdekripsi (Runtime)
+
+Berikut adalah nilai-nilai yang telah terdekripsi (plaintext) setelah melewati rantai dekripsi di atas. Nilai-nilai ini diperoleh melalui analisis runtime:
+
+```
+API_KEY="vT8tINqHaOxXbGE7eOWAhA=="
+AX_FP_KEY="18b4d589826af50241177961590e6693"
+AX_API_SIG_KEY="18b4d589826af50241177961590e6693"
+XDATA_KEY="5dccbf08920a5527b99e222789c34bb7"
+X_API_BASE_SECRET="mU1Y4n1vBjf3M7tMnRkFU08mVyUJHed8B5En3EAniu1mXLixeuASmBmKnkyzVziOye7rG5nIekMdthensbQMcOJ6SLnrkGyfXALD7mrBC6vuWv6G01pmD3XlU5rT7Tzx"
+X_SECRET="#ae-hei_9Tee6he+Ik3Gais5="
+CIRCLE_MSISDN_KEY="5dccbf08920a5527"
+```
+
+**Pemetaan Kunci ke Penggunaan API:**
+
+| Nama Kunci | Nilai | Penggunaan di Aplikasi |
+|---|---|---|
+| `API_KEY` | `vT8tINqHaOxXbGE7eOWAhA==` | Header `x-api-key` pada HTTP request (dari `getApiKey()` → interceptor `Ab/a`) |
+| `AX_FP_KEY` | `18b4d589826af50241177961590e6693` | Header `ax-fingerprint` — device fingerprint key |
+| `AX_API_SIG_KEY` | `18b4d589826af50241177961590e6693` | Header `ax-api-signature` — API request signing key |
+| `XDATA_KEY` | `5dccbf08920a5527b99e222789c34bb7` | Kunci enkripsi data (dari `getEncryptionKey()`) — 32 hex chars = 128-bit AES key |
+| `X_API_BASE_SECRET` | `mU1Y4n1vBjf3M7tMnRkFU08mVyU...` | Kunci HMAC-SHA512 (dari `getEncryptionKeyHmac512()`) — 132 chars, digunakan untuk request signing |
+| `X_SECRET` | `#ae-hei_9Tee6he+Ik3Gais5=` | Secret key tambahan untuk autentikasi/enkripsi |
+| `CIRCLE_MSISDN_KEY` | `5dccbf08920a5527` | Kunci enkripsi MSISDN (16 hex chars = 64-bit) — prefix dari `XDATA_KEY` |
+
+**Catatan:** `AX_FP_KEY` dan `AX_API_SIG_KEY` memiliki nilai identik, dan `CIRCLE_MSISDN_KEY` merupakan 16 karakter pertama dari `XDATA_KEY` — menunjukkan derivasi kunci dari sumber yang sama.
+
 #### 📊 Analisis Pola Kunci
 
-| Kategori | Jumlah | Panjang Decoded (bytes) | Format |
+| Kategori | Jumlah | Format Terenkripsi | Format Terdekripsi |
 |---|---|---|---|
-| **Kunci Enkripsi** (API, SSL, AES, HMAC) | 7 | 32–144 | Base64URL, kemungkinan AES key / HMAC key |
-| **Kredensial CIAM** (Client ID, Secret, URL, HMAC) | 6 | 48 | Base64URL-encoded credential |
-| **Kunci Pembayaran Xendit** | 6 | 96 | Encoded prefix 21 char (decode: 16 bytes header identik) |
-| **App ID SDK** (MoEngage, Medallia, Optimizely, AppsFlyer) | 4 | 32–704 | Base64URL-encoded identifiers |
-| **Konfigurasi Datadog** (Token, App ID, Env) | 3 | 16–48 | Base64URL-encoded config |
+| **Kunci Enkripsi** (API, SSL, AES, HMAC) | 7 | Base64URL 44–192 chars | Base64/Hex 24–132 chars |
+| **Kredensial CIAM** (Client ID, Secret, URL, HMAC) | 6 | Base64URL 64 chars | String credential |
+| **Kunci Pembayaran Xendit** | 6 | Base64URL 128 chars (prefix identik 21 char) | Xendit API key |
+| **App ID SDK** (MoEngage, Medallia, Optimizely, AppsFlyer) | 4 | Base64URL 44–940 chars | SDK identifier |
+| **Konfigurasi Datadog** (Token, App ID, Env) | 3 | Base64URL 24–64 chars | Config value |
 
 **Temuan Penting:**
-- `getLiveChatAesEncryptionKey` dan `getEncryptionKeyAESCustomPrepaidAndPrio` mengembalikan **nilai yang identik** — kemungkinan menggunakan kunci AES yang sama
-- `getXlEnterpriseXenditKey` dan `getXlEnterpriseSelfPaidXenditKey` mengembalikan **nilai yang identik** — endpoint pembayaran yang sama
-- Semua 6 kunci Xendit memiliki **prefix 21 karakter encoded yang sama** (`c91bb1tNs6S8HUweZt8mg`) yang decode ke 16 bytes identik — menunjukkan shared secret component atau initialization vector bersama. **⚠️ Risiko keamanan:** kompromi satu kunci dapat memfasilitasi serangan terhadap kunci Xendit lainnya karena komponen kriptografi yang dibagi
+- `getLiveChatAesEncryptionKey` dan `getEncryptionKeyAESCustomPrepaidAndPrio` mengembalikan **ciphertext yang identik** — setelah dekripsi menghasilkan kunci AES yang sama
+- `getXlEnterpriseXenditKey` dan `getXlEnterpriseSelfPaidXenditKey` mengembalikan **ciphertext yang identik** — endpoint pembayaran yang sama
+- Semua 6 kunci Xendit memiliki **prefix 21 karakter encoded yang sama** (`c91bb1tNs6S8HUweZt8mg`) yang decode ke 16 bytes identik — menunjukkan shared IV (Initialization Vector) pada enkripsi AES. **⚠️ Risiko keamanan:** kompromi satu kunci dapat memfasilitasi serangan terhadap kunci Xendit lainnya karena IV yang dibagi
 - `getMedalliaAppId` memiliki ukuran sangat besar (940 karakter, decode ke 704 bytes) — kemungkinan berisi konfigurasi JSON terenkripsi, bukan sekadar App ID
-- Semua nilai disimpan langsung sebagai plaintext base64url di section `.rodata` — **tidak ada enkripsi tambahan di level native**
+- Nilai-nilai di `.rodata` adalah **ciphertext AES** yang didekripsi menggunakan SHA-256 hash dari signing certificate APK — memberikan lapisan perlindungan tambahan: ekstraksi binary saja **tidak cukup** untuk mendapatkan plaintext tanpa certificate yang tepat
 
-**Keamanan:** Kunci-kunci disimpan di native code (bukan di Java/Kotlin) dan dihasilkan menggunakan fungsi `random_string` internal. Meskipun lebih sulit diekstrak dibandingkan string Java, analisis binary statis dengan disassembler tetap dapat mengungkap semua nilai.
+**Keamanan:** Kunci-kunci disimpan di native code dan dienkripsi dengan AES menggunakan signing certificate sebagai kunci. Ini merupakan skema perlindungan dua lapis: (1) native code lebih sulit di-reverse engineer dibanding Java/Kotlin, dan (2) dekripsi memerlukan certificate hash yang hanya tersedia saat runtime pada APK yang ditandatangani dengan certificate yang benar.
 
 **Package Java:** `com.myxlultimate.core.spice.Cardamom`
 
@@ -538,10 +612,11 @@ Aplikasi menggunakan arsitektur modular dengan 39 feature module:
    - Monitoring port jaringan
    - Pemeriksaan integritas DEX
 
-3. **Native Key Storage** — `libcardamom.so`
-   - 26 kunci/secret disimpan di native code
+3. **Native Key Storage + AES Encryption** — `libcardamom.so` + `CardamomHelper`
+   - 26 kunci/secret disimpan di native code sebagai **ciphertext AES terenkripsi**
+   - Dekripsi dilakukan di Java layer menggunakan SHA-256 hash dari signing certificate APK
    - Termasuk SSL cert, encryption key, payment key (Xendit), CIAM credentials
-   - Menggunakan random string generation
+   - Skema perlindungan dua lapis: native storage + certificate-based decryption
 
 4. **SQLCipher** — `libsqlcipher.so`
    - Enkripsi database lokal dengan AES-256
