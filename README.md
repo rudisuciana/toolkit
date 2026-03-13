@@ -282,7 +282,7 @@ CIRCLE_MSISDN_KEY="5dccbf08920a5527"
 **Temuan Penting:**
 - `getLiveChatAesEncryptionKey` dan `getEncryptionKeyAESCustomPrepaidAndPrio` mengembalikan **ciphertext yang identik** — setelah dekripsi menghasilkan kunci AES yang sama
 - `getXlEnterpriseXenditKey` dan `getXlEnterpriseSelfPaidXenditKey` mengembalikan **ciphertext yang identik** — endpoint pembayaran yang sama
-- Semua 6 kunci Xendit memiliki **prefix 21 karakter encoded yang sama** (`c91bb1tNs6S8HUweZt8mg`) yang decode ke 16 bytes identik — menunjukkan shared IV (Initialization Vector) pada enkripsi AES. **⚠️ Risiko keamanan:** kompromi satu kunci dapat memfasilitasi serangan terhadap kunci Xendit lainnya karena IV yang dibagi
+- Semua 6 kunci Xendit memiliki **prefix 21 karakter encoded yang sama** (`c91bb1tNs6S8HUweZt8mg`) yang decode ke 16 bytes identik — menunjukkan shared IV (Initialization Vector) pada enkripsi AES. **⚠️ Catatan keamanan:** penggunaan IV yang sama melemahkan jaminan kerahasiaan karena memungkinkan analisis pola antar ciphertext
 - `getMedalliaAppId` memiliki ukuran sangat besar (940 karakter, decode ke 704 bytes) — kemungkinan berisi konfigurasi JSON terenkripsi, bukan sekadar App ID
 - Nilai-nilai di `.rodata` adalah **ciphertext AES** yang didekripsi menggunakan SHA-256 hash dari signing certificate APK — memberikan lapisan perlindungan tambahan: ekstraksi binary saja **tidak cukup** untuk mendapatkan plaintext tanpa certificate yang tepat
 
