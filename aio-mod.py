@@ -28,7 +28,13 @@ from pathlib import Path
 try:
     import requests
 except ImportError:
-    subprocess.run([sys.executable, "-m", "pip", "install", "requests", "-q"], check=True)
+    print("[INFO] 'requests' package not found. Attempting install ...")
+    result = subprocess.run(
+        [sys.executable, "-m", "pip", "install", "requests", "-q"],
+    )
+    if result.returncode != 0:
+        print("[ERROR] Failed to install 'requests'. Run: pip3 install requests")
+        sys.exit(1)
     import requests
 
 # ────────────────────────────────── ANSI Colors ──────────────────────────────
@@ -47,6 +53,17 @@ RESET = "\033[0m"
 
 TOOL_DIR = os.path.join(os.path.expanduser("~"), ".aio-toolkit")
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Default certificate values for custom signing
+CERT_DEFAULTS = {
+    "CN": "t.me/user_legend",
+    "OU": "will69",
+    "O": "will69",
+    "L": "MARS",
+    "ST": "SATURN",
+    "C": "PLUTO",
+    "EMAIL": "will69@sign.com",
+}
 
 TOOL_URLS = {
     "APKEditor.jar": (
@@ -319,11 +336,17 @@ def modify_manifest(manifest_path, app_name=None, extract_native_libs=None):
     return True
 
 
+def _dex_sort_key(name):
+    """Extract numeric index from a classesN.dex filename for sorting."""
+    m = re.search(r"(\d+)", name)
+    return int(m.group(1)) if m else 0
+
+
 def shift_dex_files(apk_dir, shift_by=1):
     """Rename classes*.dex → classes(N+shift).dex in descending order."""
     dex_files = sorted(
         (f for f in os.listdir(apk_dir) if re.match(r"classes\d*\.dex$", f)),
-        key=lambda x: int(m.group(1)) if (m := re.search(r"(\d+)", x)) else 0,
+        key=_dex_sort_key,
         reverse=True,
     )
     for dname in dex_files:
@@ -759,18 +782,15 @@ def auto_sign():
             return
 
         print(f"\n  {BOLD}{CYAN}Custom Certificate Info:{RESET}")
-        cn = (
-            input(f"  CN  [{CYAN}t.me/user_legend{RESET}]: ").strip()
-            or "t.me/user_legend"
-        )
-        ou = input(f"  OU  [{CYAN}will69{RESET}]: ").strip() or "will69"
-        o = input(f"  O   [{CYAN}will69{RESET}]: ").strip() or "will69"
-        loc = input(f"  L   [{CYAN}MARS{RESET}]: ").strip() or "MARS"
-        st = input(f"  ST  [{CYAN}SATURN{RESET}]: ").strip() or "SATURN"
-        c = input(f"  C   [{CYAN}PLUTO{RESET}]: ").strip() or "PLUTO"
+        d = CERT_DEFAULTS
+        cn = input(f"  CN  [{CYAN}{d['CN']}{RESET}]: ").strip() or d["CN"]
+        ou = input(f"  OU  [{CYAN}{d['OU']}{RESET}]: ").strip() or d["OU"]
+        o = input(f"  O   [{CYAN}{d['O']}{RESET}]: ").strip() or d["O"]
+        loc = input(f"  L   [{CYAN}{d['L']}{RESET}]: ").strip() or d["L"]
+        st = input(f"  ST  [{CYAN}{d['ST']}{RESET}]: ").strip() or d["ST"]
+        c = input(f"  C   [{CYAN}{d['C']}{RESET}]: ").strip() or d["C"]
         email = (
-            input(f"  Email [{CYAN}will69@sign.com{RESET}]: ").strip()
-            or "will69@sign.com"
+            input(f"  Email [{CYAN}{d['EMAIL']}{RESET}]: ").strip() or d["EMAIL"]
         )
 
         ks_path = os.path.join(os.getcwd(), "custom.keystore")
