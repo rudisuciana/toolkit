@@ -1,200 +1,178 @@
-# all-in-one mod toolkit pro
+# AIO-Mod Toolkit v2.0 — Open Source
 
-Script gabut.
+Rewrite bersih dan transparan dari tool **aio-mod** yang sebelumnya terobfuskasi.
+
+Script ini dibuat ulang dari hasil reverse-engineering binary asli.
+**Tanpa obfuscation · Tanpa anti-debug · Tanpa kill switch · Tanpa remote password.**
 
 ---
 
-## ⚠️ SECURITY ANALYSIS — aio-mod
+## ⚠️ Latar Belakang — Temuan Analisis aio-mod Asli
 
-Analisis mendalam terhadap file `aio-mod` menemukan beberapa temuan keamanan penting:
+File `aio-mod` asli (205.718 baris, ~15MB) ternyata mengandung beberapa masalah keamanan serius:
 
-### 🔍 Struktur File
+| Temuan | Risiko |
+|--------|--------|
+| **Anti-Debugging** — Self-destruct jika `bash -x` terdeteksi | 🔴 Tinggi |
+| **Anti-Analysis** — Hex obfuscation + gzip + `eval` berlapis | 🔴 Tinggi |
+| **Hidden Execution** — Extract binary ke `~/.cache/.aio_*` random, jalankan, auto-delete 5 detik | 🔴 Tinggi |
+| **Remote Kill Switch** — Cek `isDie.txt` dari GitHub untuk matikan tool jarak jauh | 🟡 Sedang |
+| **Remote Password** — Password diverifikasi terhadap hash SHA256 remote (`kanjut.txt`) | 🟡 Sedang |
+| **Compiled Binary** — Source code disembunyikan dalam Nuitka-compiled binary | 🟡 Sedang |
 
-`aio-mod` adalah bash script (~15MB, 205.718 baris) dengan struktur berlapis:
+### Detail Teknis
 
-1. **Wrapper Layer** — Bash script dengan obfuscation menggunakan hex-encoded strings
-2. **Payload Layer** — Gzip-compressed bash code yang di-`eval`
-3. **Binary Layer** — Base64-encoded ZIP berisi ELF binary ARM64 (Nuitka-compiled Python 3.12)
+<details>
+<summary>Klik untuk melihat detail analisis</summary>
 
-### 🛑 Temuan Keamanan Kritis
-
-#### 1. Anti-Debugging / Anti-Analysis (Self-Destruct)
-
-Script menggunakan hex-encoded `eval` + `printf` + `gunzip` untuk menyembunyikan kode:
-
+#### Obfuscation Layer
+```bash
+# Hex-encoded commands
+_c1=$'\x70\x72\x69\x6e\x74\x66'  # printf
+_c2=$'\x67\x75\x6e\x7a\x69\x70'  # gunzip
+_e=$'\x65\x76\x61\x6c'            # eval
 ```
-_c1 = printf
-_c2 = gunzip  
-_e  = eval
-```
 
-Ketika di-decode, ditemukan **anti-debugging trap**:
-
+#### Anti-Debug Trap (decoded)
 ```bash
 if [[ "$-" == *"x"* ]]; then rm -f "$0"; kill -9 $$; fi
 function echo { rm -f "$0"; exit; };
 ```
 
-- Jika script dijalankan dengan `bash -x` (debug mode), script **menghapus dirinya sendiri** lalu mematikan process
-- `echo` di-override: jika ada yang mencoba `echo` output, script **menghapus dirinya sendiri** dan exit
-
-#### 2. Hidden Binary Execution
-
-Payload layer yang terdekompresi menunjukkan:
-
+#### Hidden Binary Extraction (decoded payload)
 ```bash
-exec 2>/dev/null                    # Sembunyikan semua error output
+exec 2>/dev/null
 RND=$(tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 8 | head -n 1)
-dest="$HOME/.cache/.aio_${RND}"    # Buat hidden directory dengan nama random
+dest="$HOME/.cache/.aio_${RND}"
 mkdir -p "$dest"
-sed "1,/^__DATA_BELOW__/d" "$0" | base64 -d > "$dest/data.zip"  # Extract embedded data
+sed "1,/^__DATA_BELOW__/d" "$0" | base64 -d > "$dest/data.zip"
 unzip -qo "$dest/data.zip" -d "$dest"
-export LD_LIBRARY_PATH="$dest:$LD_LIBRARY_PATH"  # Load custom shared libraries
+export LD_LIBRARY_PATH="$dest:$LD_LIBRARY_PATH"
 BIN_EXE=$(find "$dest" -maxdepth 1 -type f -not -name "*.so" -not -name "*.txt" | head -n 1)
 chmod +x "$BIN_EXE"
-(sleep 5; rm -rf "$dest") & disown  # Self-cleanup setelah 5 detik
-"$BIN_EXE" "$@"                     # Jalankan binary
+(sleep 5; rm -rf "$dest") & disown
+"$BIN_EXE" "$@"
 ```
 
-Pola ini:
-- Membuat **hidden directory** dengan nama random di `~/.cache/`
-- Mengekstrak dan menjalankan **ELF binary** tersembunyi (`aio-mod.bin`)
-- Memodifikasi `LD_LIBRARY_PATH` untuk load custom `.so` files
-- **Auto-delete** setelah 5 detik (anti-forensics)
-
-#### 3. Remote Kill Switch
-
-Binary menghubungi URL berikut saat runtime:
-
+#### Remote Kill Switch
 | URL | Fungsi |
 |-----|--------|
-| `https://raw.githubusercontent.com/willstore69/tools/refs/heads/main/isDie.txt` | **Remote kill switch** — Jika value berubah, tool bisa dimatikan dari jarak jauh |
-| `https://raw.githubusercontent.com/willstore69/utils/refs/heads/main/kanjut.txt` | **Remote password hash** — Password diverifikasi terhadap hash SHA256 yang dikendalikan remote |
+| `willstore69/tools/.../isDie.txt` | Kill switch — `no` = aktif, `yes` = matikan |
+| `willstore69/utils/.../kanjut.txt` | SHA256 hash password untuk autentikasi |
 
-Saat ini `isDie.txt` berisi `no` (tool aktif), dan `kanjut.txt` berisi hash SHA256. Author bisa kapan saja:
-- Menonaktifkan tool semua user sekaligus
-- Mengganti password tanpa sepengetahuan user
+#### Embedded Binary
+Binary `aio-mod.bin` (14.8 MB) adalah Nuitka-compiled Python 3.12 ARM64 yang membundel 60+ file termasuk `libpython3.12.so`, `libcrypto.so.3`, `libssl.so.3`, dan banyak extension module.
 
-#### 4. Embedded Nuitka-Compiled Binary
-
-`aio-mod.bin` adalah binary ELF 64-bit ARM aarch64 yang dikompilasi menggunakan **Nuitka** dari source Python `aio-mod.py`. Binary ini membundel:
-
-| File | Ukuran | Keterangan |
-|------|--------|------------|
-| `aio-mod.bin` | 14.8 MB | Main binary (compiled Python) |
-| `libpython3.12.so.1.0` | 6.7 MB | Python runtime |
-| `libcrypto.so.3` | 5.2 MB | OpenSSL crypto |
-| `libssl.so.3` | 874 KB | OpenSSL SSL |
-| `certifi/cacert.pem` | 272 KB | CA certificates |
-| + 50 more `.so` files | ~3 MB | Python extension modules |
-
-#### 5. Password-Protected ZIP Archives
-
-File pendukung (`will_core.zip`, `will2_core.zip`, `will3_core.zip`) berisi:
-
-- **will_core.zip** (password-protected): `will69.dex`, `libwillgacor69.so` (ARM64/ARMv7/x86/x86_64)
-- **will2_core.zip**: `core.dex` (166KB), `libcore.so` (1.9MB ARM64)
-- **will3_core.zip**: `core.dex` (164KB), `libcore.so` (1.9MB ARM64)
-
-File `.dex` dan `.so` ini diinjeksi ke APK target sebagai bagian dari proses patching.
-
-### 📋 Fitur Tool (dari String Analysis)
-
-Menu utama yang ditemukan di binary:
-
-- Auto Sign APK
-- Bypass SSL Flutter
-- Custom Signature / Default Sign
-- DPT Unpack
-- Signature Killer v1
-- Smali Patcher
-- Check Update
-
-Tool mendownload dependencies runtime dari:
-- `github.com/willstore69/tools` — `APKEditor.jar`, `apksigner.jar`, `testkey.pk8`, `testkey.x509.pem`
-- `github.com/qomg/AndroidManifestEditor` — `ManifestEditor-1.0.2.jar`
-
-### 🧬 Author Information
-
-```
-Author:  @user_legend
-Channel: @ngemod_in
-Email:   will69@sign.com
-Source:  aio-mod.py (compiled to binary)
-```
-
-### 🎯 Kesimpulan
-
-| Aspek | Temuan | Risiko |
-|-------|--------|--------|
-| Anti-Debug | Self-destruct jika di-trace | 🔴 Tinggi |
-| Anti-Analysis | Hex obfuscation + gzip + eval | 🔴 Tinggi |
-| Hidden Execution | Extract & run binary dari hidden dir | 🔴 Tinggi |
-| Remote Kill Switch | Author bisa matikan tool kapan saja | 🟡 Sedang |
-| Remote Password | Password dikendalikan remote | 🟡 Sedang |
-| Self-Cleanup | Auto-delete setelah 5 detik | 🟡 Sedang |
-| Compiled Binary | Source code tidak tersedia, sulit di-audit | 🟡 Sedang |
-
-**Rekomendasi:** Jangan jalankan script ini tanpa memahami sepenuhnya apa yang dilakukannya. Mekanisme anti-debugging dan self-destruct menunjukkan bahwa author secara sengaja menyembunyikan perilaku script dari inspeksi.
+</details>
 
 ---
 
-## ✨ Features
+## 🆕 Versi Open Source (`aio-mod.py`)
 
-- ✅ Auto Sign (Support Custom Certificate Info)
-- ✅ Auto Detect File:
-  - `.apk`
-  - `.xapk`
-  - `.apks`
-- ✅ Kill Signature V1 (MT VIP method)
-- ✅ Kill Signature V2 (NP SRPatch method)
-- ✅ Patch / Kill Sign / Bypass no signed (Signature tetap Ori)
+Rewrite lengkap sebagai **Python script murni** — bisa dibaca, diaudit, dan dimodifikasi bebas.
+
+### ✨ Features
+
+| # | Fitur | Deskripsi |
+|---|-------|-----------|
+| 1 | **Signature Killer v1** | MT VIP method — inject DEX + SO + patch manifest |
+| 2 | **Signature Killer v2** | SRPatch method — inject core DEX + SO |
+| 3 | **Auto Sign APK** | Default testkey atau custom certificate |
+| 4 | **Bypass SSL Flutter** | Patch `libflutter.so` via radare2 (ret0) |
+| 5 | **DPT Unpack** | Unpack DPT-protected APKs |
+| 6 | **Smali Patcher** | Ads removal, screenshot bypass, VPN bypass, installer spoof |
+| 7 | **Universal .SO Patcher** | Patch fungsi native via radare2 |
+
+### 📦 Format yang Didukung
+
+Tool otomatis mendeteksi dan memproses:
+- `.apk` — Single package
+- `.xapk` — Split bundle (auto-extract base)
+- `.apks` — Bundle installer output (auto-merge via APKEditor)
 
 ---
 
-## 🔐 Password
+## 🚀 Instalasi (Termux)
+
+```bash
+# 1. Install dependencies
+bash required.sh
+
+# 2. Jalankan
+python3 aio-mod.py
+```
+
+### Dependencies
+
+| Package | Fungsi |
+|---------|--------|
+| `openjdk-21` | Java runtime untuk APKEditor, apksigner, ManifestEditor |
+| `radare2` | Binary analysis & patching untuk .so |
+| `aapt` | Android Asset Packaging Tool |
+| `android-tools` | ADB dan tools Android lainnya |
+| `zip` / `unzip` | Manipulasi APK (ZIP format) |
+| `python3` | Runtime script |
+| `requests` (pip) | HTTP downloads |
+
+---
+
+## 📁 Struktur File
 
 ```
-@user_legend
+toolkit/
+├── aio-mod.py          # ← Script utama (open source, bersih)
+├── aio-mod              # File asli (obfuscated, untuk referensi)
+├── required.sh          # Installer dependencies Termux
+├── will_core.zip        # Core files untuk Signature Killer v1
+├── will2_core.zip       # Core files untuk Signature Killer v2 (variant 1)
+├── will3_core.zip       # Core files untuk Signature Killer v2 (variant 2)
+└── README.md            # Dokumentasi ini
 ```
 
 ---
 
-## 📦 Supported Formats
+## 🔧 Cara Pakai
 
-Tool ini otomatis mendeteksi dan memproses:
+```
+╔══════════════════════════════════════════╗
+║       AIO-MOD TOOLKIT v2.0 (OSS)        ║
+║    Open Source APK Modding Toolkit       ║
+╚══════════════════════════════════════════╝
 
-- APK (Single package)
-- XAPK (Split bundle)
-- APKS (Bundle installer output)
+  MENU UTAMA
 
-Tidak perlu manual extract.
+  [1] Signature Killer v1
+  [2] Signature Killer v2 (SRPatch)
+  [3] Auto Sign APK
+  [4] Bypass SSL Flutter
+  [5] DPT Unpack
+  [6] Smali Patcher
+  [7] Universal .SO Patcher
+  [0] Exit
+```
+
+1. Taruh file APK/XAPK/APKS di folder yang sama
+2. Jalankan `python3 aio-mod.py`
+3. Pilih fitur dari menu
+4. Ikuti instruksi yang muncul
 
 ---
 
 ## 🙏 Credits
 
-- AbhiTheModder — SSL Flutter  
-- Smali Patcher — AdsRegex & TDOhex  
-- DPT-Unpack — Base from Aantik  
-- Universal .so Patcher — Base from Vince  
-- Thanks to Komunitas Mod khususnya NullRe & TDOhex  
-
----
-
-## ☕ Support
-
-Kalau script ini membantu, bisa support di sini:
-
-https://t.me/autoscript_willstore69/217
+- AbhiTheModder — SSL Flutter bypass technique
+- AdsRegex & TDOhex — Smali Patcher patterns
+- Aantik — DPT-Unpack base
+- Vince — Universal .so Patcher concept
+- Komunitas Mod — NullRe & TDOhex
 
 ---
 
 ## ⚠ Disclaimer
 
-Tool ini dibuat untuk tujuan edukasi dan research.  
-Segala penyalahgunaan bukan tanggung jawab author.
+Tool ini dibuat untuk tujuan **edukasi dan research** saja.
+Segala penyalahgunaan bukan tanggung jawab kontributor.
 
 ---
 
-Made with chaos & curiosity.
+Open source · Transparent · No backdoors.

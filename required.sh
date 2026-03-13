@@ -1,16 +1,30 @@
-pkg update && pkg upgrade -y
-pkg install wget -y
-pkg install openjdk-21 -y
-pkg install radare2 -y
-pkg install android-tools -y
-pkg install aapt -y
-pkg install zip unzip -y
-pkg install curl -y
-pkg install python3 -y
+#!/data/data/com.termux/files/usr/bin/bash
+# AIO-Mod Toolkit v2.0 — Dependency Installer for Termux
+set -e
+
+echo "[INFO] Updating packages..."
+pkg update -y && pkg upgrade -y
+
+echo "[INFO] Installing required packages..."
+pkg install -y \
+    wget \
+    openjdk-21 \
+    radare2 \
+    android-tools \
+    aapt \
+    zip \
+    unzip \
+    curl \
+    python3
+
+echo "[INFO] Installing Python dependencies..."
 pip3 install requests
+
 clear
-echo "now run script with:"
-echo "bash aio-mod"
+echo "=========================================="
+echo "  Dependencies installed successfully!"
+echo "=========================================="
 echo ""
-echo "first install will take a 1-2 minutes"
-echo "thank you :3"
+echo "  Run the toolkit with:"
+echo "    python3 aio-mod.py"
+echo ""
