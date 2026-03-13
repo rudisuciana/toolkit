@@ -146,7 +146,73 @@ Repository memuat **8 file DEX** (Dalvik Executable) dan **10 file native librar
 | `getDataDogAppId` | App ID Datadog |
 | `getDataDogEnvName` | Nama environment Datadog |
 
-**Keamanan:** Kunci-kunci disimpan di native code (bukan di Java/Kotlin) dan dihasilkan menggunakan fungsi `random_string` internal.
+#### 🔓 Hasil Ekstraksi 26 Kunci/Secret
+
+Nilai-nilai berikut berhasil diekstraksi dari section `.rodata` di `libcardamom.so` melalui analisis disassembly ARM64 (ADRP+ADD pattern → alamat data di `.rodata`). Semua nilai disimpan sebagai string **base64url-encoded** langsung di binary.
+
+**Metodologi Ekstraksi:**
+1. Menggunakan **LIEF** untuk parsing ELF dan mendapatkan alamat fungsi JNI
+2. Menggunakan **Capstone** untuk mendisassembly setiap fungsi (arsitektur ARM64)
+3. Mengidentifikasi pola `ADRP xN, #page` + `ADD xN, xN, #offset` untuk menghitung alamat data
+4. Mengidentifikasi pola `STRB wzr, [x0, #len]` untuk menentukan panjang string (null terminator)
+5. Membaca string dari alamat virtual yang dihitung di section `.rodata`
+
+| # | Fungsi | Panjang | Nilai (Base64URL) |
+|---|---|---|---|
+| 1 | `getApiKey` | 44 | `Y5HfxgZ2lusxkpRWNqepA0bKaXCoJSlWL6NWvNnCu48=` |
+| 2 | `getSslCertKey` | 88 | `5QWvWV8dlu19Jk7jEVYhYM8ySJdjR3G7U5hjg6FKBcyqr8tycDtL8u7bi28-ydYh86Sdh_XXccwlk9Kq7wf28Q==` |
+| 3 | `getCiamSslCertKey` | 88 | `V0C6UGlATEtqGf0SrFAx18eFSXBEoaqSf3oXlbCve8VJhoEY0OI7xuCudYWy0nFskTVJP4zphLDyfmUk0X8amA==` |
+| 4 | `getEncryptionKey` | 64 | `jPIvjdOJzofWIfEgT2QLqNjxKDoL6nVWsFLJURIQoaonfAEk-JclxqLES-gIvOcs` |
+| 5 | `getEncryptionKeyAESCustomPrepaidAndPrio` | 64 | `kqT0F4XkQB9SXsS0IQrxtekiH1y6jo-QUKt2W1S5Nt8wLAdK_g0zkrkl9fTJh_me` |
+| 6 | `getEncryptionKeyHmac512` | 192 | `WUPdzLVRxGeC6SDiNbpxu4R7ezorbq6NHd_OfPhI6-l5tdXPln9iZLwcsxYyXJVa-XjYUbCOjs03Qg-VieKSVAgjdYdbw7vE-QCFFpCT90_XsFoYssdN-BgoYLVtuBh_6gllIZw3ZJQQUSmpcUwAfc8BRFKT1C6k_jxN5Jf-hfRR8YewewR7BEaDkewML_OX` |
+| 7 | `getLiveChatAesEncryptionKey` | 64 | `kqT0F4XkQB9SXsS0IQrxtekiH1y6jo-QUKt2W1S5Nt8wLAdK_g0zkrkl9fTJh_me` |
+| 8 | `getCiamClientId` | 64 | `L9BvWoF2sovdMstZRni5h2lWnFPX5LbfzgDhJaP-NEpHC3vHW9hOHBl-iFhYeAK5` |
+| 9 | `getCiamClientSecret` | 64 | `DfJHvkjATDuYPIcglcaddpOy9MJVT8ptEpd0Fny3gYU6Fxxcd6vD8eAjg3QYXWiZ` |
+| 10 | `getCiamClientIdSecond` | 64 | `yszGMAhyWHaQ7QCC7QOtRnFLDIvcPb-6yHDItkoAKCTkyknqHS5Tc2RUoqssHQQl` |
+| 11 | `getCiamClientSecondSecret` | 64 | `vgRJ2rKWKDvnGuvSHPpsFGa2kAwlE-zb25PjesdxUkUPTg3_kozkg_h0HIr0NQiI` |
+| 12 | `getCiamHmacKey` | 64 | `jDaxHwocBR2jF9Rfzc_PQ34SH-sWsKas88CDxiue6-Kbes-z7C7DyRoBQD93Dleg` |
+| 13 | `getCiamUrl` | 64 | `tC7DQnovEIYfigr_RbHHKcZg-Vb3MaquYT-IE1NqOwucMiGyCNXdyw2vMTDe4yOq` |
+| 14 | `getXlPrepaidXenditKey` | 128 | `c91bb1tNs6S8HUweZt8mg6-dOLbANhqHhCj25pdSNu2t-8aNI_jK0pW-8FNwiKN0mTnroSTDmNfqyfEzpRI4CvyTQ_2hFDNlnkxO_PfAS-oPHNA7QOSKtD-POS3oybkU` |
+| 15 | `getXlAxisTrialXenditKey` | 128 | `c91bb1tNs6S8HUweZt8mg1t0YzyxMJz4QEw3g1IQlB3evBPtkrJgI5QSo_gR-ziiirACDV0bQ1ByUYgpzHXGrQva_kV56WlZiL1mxzI6gXqAprqjkPBbTH4KV5_WAyfw` |
+| 16 | `getXlPrioXenditKey` | 128 | `c91bb1tNs6S8HUweZt8mgzhY0ENUsWn9ikSMoEeAxfNsIBDVE06xJmJduu6Sa4pRQDm3MJ_KQhhVzMRZ34NWxAnEcyJ91JBa02vnE7-oC2SrqYx7k-f0BUrJhb552hkH` |
+| 17 | `getXlHomeXenditKey` | 128 | `c91bb1tNs6S8HUweZt8mg5IMhxGSMaltB6uCDOlPLgcTs-GFVsNkVnywuonhMNLMMLtO6CKxMQwwaYDrmxVHrMWHSGyVaSCmBW8tJiTXC0Osiz7gEcTdtTNhdAl4OVnA` |
+| 18 | `getXlEnterpriseXenditKey` | 128 | `c91bb1tNs6S8HUweZt8mg7hEwxZdP-z9BBqMZODwIeibGmj-nNF1xQPer5GUUI2wsqGQbaamMeCqeDsWG-GWSYsls_i0bDuQ9zfDTfWmGHy2diseMBno33q8TJh8ssym` |
+| 19 | `getXlEnterpriseSelfPaidXenditKey` | 128 | `c91bb1tNs6S8HUweZt8mg7hEwxZdP-z9BBqMZODwIeibGmj-nNF1xQPer5GUUI2wsqGQbaamMeCqeDsWG-GWSYsls_i0bDuQ9zfDTfWmGHy2diseMBno33q8TJh8ssym` |
+| 20 | `getMoEngageAppId` | 44 | `cwGpXU3ZXx-dxyYyGdM_MTrJpjsBfHkSma7L1YWCdyU=` |
+| 21 | `getMedalliaAppId` | 940 | `Imf7-c2cRFKeqhh2-yHmP4iMfn8q5SX4tBZWPher3C8W8D75vyxm7OR0CGtOaTsF...` *(truncated — lihat detail di bawah)* |
+| 22 | `getOptimizelyAppId` | 44 | `on_9w8Uh_cGp17qDlX3eo1GyAO_pcuVG5APLbtyVtMc=` |
+| 23 | `getAppsflyerAppId` | 44 | `kfFxsrqHQQYQFN49Qj159FW1FQtcIWYN8Wo55RLrMS4=` |
+| 24 | `getDataDogClientToken` | 64 | `-v3A9nnmblhk90cFom_ulJl-tRspc1z1ls93gS7sMl6b3h9jZvVOb6_XQmeAF7g0` |
+| 25 | `getDataDogAppId` | 64 | `J0FvHs_A4FLPOZKHKZK2IxMvOgP3NXrUm0jR3EBlPYoOSOVj65suD0z4ICc4RXxz` |
+| 26 | `getDataDogEnvName` | 24 | `ePyAWhBGQvh0R6wIi7s4ew==` |
+
+<details>
+<summary>🔎 Nilai lengkap getMedalliaAppId (940 karakter)</summary>
+
+```
+Imf7-c2cRFKeqhh2-yHmP4iMfn8q5SX4tBZWPher3C8W8D75vyxm7OR0CGtOaTsFTaH3-2TOLOefpNqmg9zr7rXL-Ba812XHFaYmhS5GAz-iLuEYNJo6ceYl1VsCmmP6Y4122Q7fFMkzNXvEsfICEVsgVGiDnoxkEV8-YJgoHwXoJEmVo7AI8xZJf_PUmU6vKC_IC58zmXFg36QlEPUkSaadj4qzR8X7gxshUhH68_XDtgd1KgQLPC_C5yW19A8ePO5EgkuqUDPDW_5fRzosQVAD4UTCumFF8iD10ej87qooqIkAvaf0H0oo-ROWU3IStKiQvcsOKJny-39tv-DShE2ykJpqbrOk5WZ3VCVQgbv0-ppY0rTAL02RdYltOADzNbZyzXH5F54jmiRVGNEMvlFnD-RNgMGcgu35PeW9lUbuL0EsdPJYC3ENS9OHTmfj6ZgmiCiaAHo87Ww4KBGcfzSIy10PD92ARE1POxXw4-CSpNLEhe8-iLRGbY5RUrAY-CbR9LDwc0fQhOHYceeB43m4tpF-EurnRNZwigv_k5dkyLf-vxTzTH5kHotCrsxE7pGyGEIgUX6R0x5n9B4-pGB2bM6GKEFFZQ9BuOe_QQHk4_jeZVjGrMuRxcxIy_PSQuBs5xvZ2N0euK47UNtSuXujQXCZEguf-jhyVjyXfyR5i95TLZK0dbc4XXP1yyQwWhxrQ0hkzD5L2wEiQtYaR0G0-j68ewqJlYXfmNU5xZvR3Xxg-EvXdiufq649LNTmTxy0rVUxJ9jc73nQan072LjdLW7g5b_CRomcK8rRtvpBe6A7A7EY0U3JDiHNELlC1sQTtLI9WyuZLpN1h1mGjbUaCX-fwVq8zn_Ne-Cww15DBLn3P5GNxlLxHHGSlvtruM4aO8emrPMjWIGX--oOrMesN2NELpzuL8neIw7Bs6Q=
+```
+
+</details>
+
+#### 📊 Analisis Pola Kunci
+
+| Kategori | Jumlah | Panjang Decoded | Format |
+|---|---|---|---|
+| **Kunci Enkripsi** (API, SSL, AES, HMAC) | 7 | 32–144 bytes | Base64URL, kemungkinan AES key / HMAC key |
+| **Kredensial CIAM** (Client ID, Secret, URL, HMAC) | 6 | 48 bytes | Base64URL-encoded credential |
+| **Kunci Pembayaran Xendit** | 6 | 96 bytes | Common prefix 21 chars, differentiating suffix |
+| **App ID SDK** (MoEngage, Medallia, Optimizely, AppsFlyer) | 4 | 32–704 bytes | Base64URL-encoded identifiers |
+| **Konfigurasi Datadog** (Token, App ID, Env) | 3 | 16–48 bytes | Base64URL-encoded config |
+
+**Temuan Penting:**
+- `getLiveChatAesEncryptionKey` dan `getEncryptionKeyAESCustomPrepaidAndPrio` mengembalikan **nilai yang identik** — kemungkinan menggunakan kunci AES yang sama
+- `getXlEnterpriseXenditKey` dan `getXlEnterpriseSelfPaidXenditKey` mengembalikan **nilai yang identik** — endpoint pembayaran yang sama
+- Semua 6 kunci Xendit memiliki **prefix 21 karakter yang sama** (`c91bb1tNs6S8HUweZt8mg`) yang decode ke 16 bytes identik — kemungkinan header/prefix umum Xendit
+- `getMedalliaAppId` memiliki ukuran sangat besar (940 karakter, decode ke 704 bytes) — kemungkinan berisi konfigurasi JSON terenkripsi, bukan sekadar App ID
+- Semua nilai disimpan langsung sebagai plaintext base64url di section `.rodata` — **tidak ada enkripsi tambahan di level native**
+
+**Keamanan:** Kunci-kunci disimpan di native code (bukan di Java/Kotlin) dan dihasilkan menggunakan fungsi `random_string` internal. Meskipun lebih sulit diekstrak dibandingkan string Java, analisis binary statis dengan disassembler tetap dapat mengungkap semua nilai.
 
 **Package Java:** `com.myxlultimate.core.spice.Cardamom`
 
