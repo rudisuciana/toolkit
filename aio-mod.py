@@ -254,8 +254,8 @@ def resolve_apk(filepath):
 
 def make_work_dir(prefix="aio_work"):
     """Create a temporary working directory in the current directory."""
-    path = os.path.join(os.getcwd(), f"{prefix}_{os.getpid()}")
-    os.makedirs(path, exist_ok=True)
+    import tempfile
+    path = tempfile.mkdtemp(prefix=f"{prefix}_", dir=os.getcwd())
     return path
 
 
@@ -1215,10 +1215,12 @@ def smali_patcher():
 
     # Quick APK info via aapt
     info("Dumping APK info via aapt ...")
-    subprocess.run(
+    result = subprocess.run(
         ["aapt", "dump", "badging", apk_file],
         capture_output=False, timeout=15,
     )
+    if result.returncode != 0:
+        warn("aapt dump failed — continuing anyway.")
 
     work = make_work_dir("smali_patch")
     apk_dir = os.path.join(work, "apk")
