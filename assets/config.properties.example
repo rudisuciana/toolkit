@@ -1,0 +1,5 @@
+BASE_API_URL=https://xlultimate.xituz.com/api/v8/
+XL_NETWORK_URL=http://apigw.xl.co.id/external/identity/api/
+API_KEY=zAkj4SVtW3tjLuDjf56oyg==
+
+ALWAYS_SHOW_CVP=true

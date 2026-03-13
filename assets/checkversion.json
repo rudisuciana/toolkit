@@ -1,0 +1,742 @@
+{
+  "navigations": [
+    {
+      "subtype": "PREPAID",
+      "category": "NO_QUOTA_CTA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "NO_QUOTA_CTA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PRIOHYBRID",
+      "category": "NO_QUOTA_CTA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "LOW_QUOTA_DATA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "LOW_QUOTA_DATA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "LOW_QUOTA_TEXT",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "LOW_QUOTA_TEXT",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "HOME",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "HOME",
+      "category": "NO_QUOTA_CTA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "HOMEFIBER",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "HOMEFIBER",
+      "category": "QUOTA_DETAIL_CHANGE_PLAN",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "HOMEPOSTPAID",
+      "category": "QUOTA_DETAIL_CHANGE_PLAN",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "HOMEPOSTPAID",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "HOMEPOSTPAID",
+      "category": "NO_QUOTA_CTA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "QUOTA_DETAIL_CHANGE_PLAN",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "NO_QUOTA_CTA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "QUOTA_DETAIL_CHANGE_PLAN",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "NO_QUOTA_CTA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PASCABAYAR",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PASCABAYAR",
+      "category": "NO_QUOTA_CTA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PASCABAYAR",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PASCABAYAR",
+      "category": "NO_QUOTA_CTA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "GO",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "TOP_UP",
+      "action_param": "",
+      "is_corporate": false
+    },
+    {
+      "subtype": "GO",
+      "category": "NO_QUOTA_CTA",
+      "subcategory": "",
+      "action_type": "TOP_UP",
+      "action_param": "",
+      "is_corporate": false
+    },
+    {
+      "subtype": "GO",
+      "category": "LOW_QUOTA_DATA",
+      "subcategory": "",
+      "action_type": "TOP_UP",
+      "action_param": "",
+      "is_corporate": false
+    },
+    {
+      "subtype": "XLHOMEIZI",
+      "category": "LOW_QUOTA_DATA",
+      "subcategory": "",
+      "action_type": "TOP_UP",
+      "action_param": "",
+      "is_corporate": false
+    },
+    {
+      "subtype": "XLHOMEIZI",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "TOP_UP",
+      "action_param": "",
+      "is_corporate": false
+    },
+    {
+      "subtype": "XLHOMEIZI",
+      "category": "NO_QUOTA_CTA",
+      "subcategory": "",
+      "action_type": "TOP_UP",
+      "action_param": "",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PASCABAYAR",
+      "category": "LOW_QUOTA_DATA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "2|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PASCABAYAR",
+      "category": "LOW_QUOTA_VOICE",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "2|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PASCABAYAR",
+      "category": "LOW_QUOTA_TEXT",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "2|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "GO",
+      "category": "ROAMING_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "EXTERNAL",
+      "action_param": "https://www.tokopedia.com/xl-axiata/kartu-perdana-khusus-xl-go-izi-xl-home",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "PROMO_VIEW_ALL",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "3|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "PROMO_VIEW_ALL",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "3|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "ROAMING_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "3|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "LOW_QUOTA_DATA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "LOW_QUOTA_TEXT",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|0",
+      "is_corporate": true
+    },
+    {
+      "subtype": "HOMEPOSTPAID",
+      "category": "LOW_QUOTA_DATA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "HOMESATU",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "HOMESATU",
+      "category": "QUOTA_DETAIL_CHANGE_PLAN",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "032f79dc-cd2a-4f91-b83d-33b5896fb7de",
+      "is_corporate": false
+    },
+    {
+      "subtype": "HOME",
+      "category": "LOW_QUOTA_DATA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "LOW_QUOTA_VOICE",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|2",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "LOW_QUOTA_VOICE",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|2",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "ROAMING_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "2|2",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "ROAMING_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|3",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "FAMPLAN_BUY_PACKAGE",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "6e469cb2-443d-402f-ba77-681b032ead6a",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PASCABAYAR",
+      "category": "ROAMING_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|1",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PASCABAYAR",
+      "category": "LOW_QUOTA_DATA",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "abf5f0ca-8513-4b47-ab64-81b2c1bc625b",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PASCABAYAR",
+      "category": "LOW_QUOTA_VOICE",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "abf5f0ca-8513-4b47-ab64-81b2c1bc625b",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PASCABAYAR",
+      "category": "LOW_QUOTA_TEXT",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "abf5f0ca-8513-4b47-ab64-81b2c1bc625b",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "LOW_QUOTA_TEXT",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "f7ff1d5f-a16a-48ec-b083-306c84491358",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "LOW_QUOTA_VOICE",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "f7ff1d5f-a16a-48ec-b083-306c84491358",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "LOW_QUOTA_DATA",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "3ccc4312-1d70-4fd9-a602-5ad440a6986f",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "FAMPLAN_BUY_PACKAGE",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "155faee2-ca22-4b24-b10f-4e16104225cb",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "PAYMENT_METHOD_CHANGE",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "91a2bc04-be5c-43a9-854d-fbab1694519b",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "ROAMING_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|2",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "FAMPLAN_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "5452eed8-91f3-4e9c-b7bb-0985759d5440",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "SHARING_BUY_FAMPLAN",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "6e469cb2-443d-402f-ba77-681b032ead6a",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "BIZ_ON_BUY_PACKAGE",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "fb1e4476-c9fe-4012-9907-3ccc65e4ba2b",
+      "is_corporate": true
+    },
+    {
+      "subtype": "SATULITE",
+      "category": "FAMPLAN_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "3a8b57fc-9eba-4bad-908b-03dd2421da26",
+      "is_corporate": false
+    },
+    {
+      "subtype": "SATULITE",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PRIORITAS",
+      "category": "QUOTA_DETAIL_UPGRADE_PLAN",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "ebdb4ebe-cb58-4e55-927b-8f1bba44b5a6",
+      "is_corporate": true
+    },
+    {
+      "subtype": "PRIOHYBRID",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "XCF_PROMO_DETAIL",
+      "subcategory": "",
+      "action_type": "PROMO",
+      "action_param": "80650dec-8515-4078-9f2e-487adf6a62fa",
+      "is_corporate": false
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "AKRAB_ADD_ON",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "c5dbcb2d-31cc-462c-afe8-b3a767c6d404",
+      "is_corporate": false
+    },
+    {
+      "subtype": "AXISTRIAL",
+      "category": "LOW_QUOTA_TEXT",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "AXISTRIAL",
+      "category": "LOW_QUOTA_DATA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "AXISTRIAL",
+      "category": "NO_QUOTA_CTA",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "AXISTRIAL",
+      "category": "ROAMING_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|3",
+      "is_corporate": false
+    },
+    {
+      "subtype": "AXISTRIAL",
+      "category": "LOW_QUOTA_VOICE",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "1|2",
+      "is_corporate": false
+    },
+    {
+      "subtype": "AXISTRIAL",
+      "category": "QUOTA_DETAIL_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PFP",
+      "action_param": "0|0",
+      "is_corporate": false
+    },
+    {
+      "subtype": "AXISTRIAL",
+      "category": "AKRAB_ADD_ON",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "c5dbcb2d-31cc-462c-afe8-b3a767c6d404",
+      "is_corporate": false
+    },
+    {
+      "subtype": "AXISTRIAL",
+      "category": "XCF_PROMO_DETAIL",
+      "subcategory": "",
+      "action_type": "PROMO",
+      "action_param": "80650dec-8515-4078-9f2e-487adf6a62fa",
+      "is_corporate": false
+    },
+    {
+      "subtype": "AXISTRIAL",
+      "category": "SHARING_BUY_FAMPLAN",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "6e469cb2-443d-402f-ba77-681b032ead6a",
+      "is_corporate": false
+    },
+    {
+      "subtype": "AXISTRIAL",
+      "category": "FAMPLAN_ADD_BOOSTER",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "5452eed8-91f3-4e9c-b7bb-0985759d5440",
+      "is_corporate": false
+    },
+    {
+      "subtype": "AXISTRIAL",
+      "category": "FAMPLAN_BUY_PACKAGE",
+      "subcategory": "",
+      "action_type": "PLP",
+      "action_param": "6e469cb2-443d-402f-ba77-681b032ead6a",
+      "is_corporate": false
+    }
+  ],
+  "images": [
+    {
+      "subtype": "PREPAID",
+      "category": "SHARING_FAMPLAN_NO_FAMPLAN",
+      "subcategory": "",
+      "image_url": "https://rinjani.myxl.xlaxiata.co.id/media-xl/paket-akrab_contextual-with-text.jpg?VersionId=zQ77sbWLurWO1hM3UAlfWVAFl_Gzi5vj",
+      "title_id": " ‎",
+      "title_en": " ‎"
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "EC_FULL_BACKGROUND_IMAGE",
+      "subcategory": "",
+      "image_url": "https://rinjani.myxl.xlaxiata.co.id/media-xl/bg-area-2.png?VersionId=null",
+      "title_id": "Full background - Excitement",
+      "title_en": ""
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "EC_TOP_RIGHT",
+      "subcategory": "",
+      "image_url": "https://rinjani.myxl.xlaxiata.co.id/media-xl/guide-bg-area-2.png?VersionId=null",
+      "title_id": "Top right - Excitement",
+      "title_en": ""
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "EC_BOTTOM_RIGHT",
+      "subcategory": "",
+      "image_url": "https://rinjani.myxl.xlaxiata.co.id/media-xl/guide-bg-area-3.png?VersionId=null",
+      "title_id": "Bottom right - Excitement",
+      "title_en": ""
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "EC_LOTTIE_DASHBOARD",
+      "subcategory": "",
+      "image_url": "https://rinjani.myxl.xlaxiata.co.id/2024-01/xlpoinplayzone.json",
+      "title_id": "Floating icon dashboard - Excitement",
+      "title_en": ""
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "EC_TOP_LEFT",
+      "subcategory": "",
+      "image_url": "https://rinjani.myxl.xlaxiata.co.id/media-xl/guide-bg-area-1.png?VersionId=null",
+      "title_id": "Top left - Excitement",
+      "title_en": ""
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "EC_LOGO",
+      "subcategory": "",
+      "image_url": "https://rinjani.myxl.xlaxiata.co.id/media-xl/logo-play-zone-horizontal.png?VersionId=null",
+      "title_id": "Logo - Excitement",
+      "title_en": ""
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "DASHBOARD_TOP",
+      "subcategory": "",
+      "image_url": "https://rinjani.myxl.xlaxiata.co.id/media-xl/top-dashboard-thematic.png?VersionId=null",
+      "title_id": "Dashboard TOP - Thematic",
+      "title_en": ""
+    },
+    {
+      "subtype": "",
+      "category": "",
+      "subcategory": "",
+      "image_url": "",
+      "title_id": "Dashboard BOTTOM - Thematic",
+      "title_en": ""
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "MY_POINT_ICON",
+      "subcategory": "",
+      "image_url": "https://rinjani.myxl.xlaxiata.co.id/media-xl/mypoin_0.png",
+      "title_id": "Logo - MY_POINT_ICON",
+      "title_en": ""
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "AUTOBUY_ICON_EN",
+      "subcategory": "",
+      "image_url": "https://rinjani.myxl.xlaxiata.co.id/media-xl/aktif.png",
+      "title_id": "Icon - AUTOBUY_EN",
+      "title_en": ""
+    },
+    {
+      "subtype": "PREPAID",
+      "category": "AUTOBUY_ICON_ID",
+      "subcategory": "",
+      "image_url": "https://rinjani.myxl.xlaxiata.co.id/media-xl/sisa-kuota.png",
+      "title_id": "Logo - AUTOBUY_ID",
+      "title_en": ""
+    }
+  ]
+}

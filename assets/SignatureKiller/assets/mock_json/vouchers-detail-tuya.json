@@ -1,0 +1,32 @@
+{
+  "code": "000",
+  "status": "SUCCESS",
+  "data": {
+    "detail": {
+      "voucher_code": "0-12345",
+      "voucher_ref": "111222",
+      "voucher_type": "VT_TUYA",
+      "name": "Rabit Cloud Service",
+      "icon": "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",
+      "header_image": "https://s3-alpha-sig.figma.com/img/ddf1/07c7/40362b1e71465393a8bce84fcde31f09?Expires=1728864000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=RWr6iYtW61jtZRsFuOGURY9n8aMH1a3n8jJvE3lT2ZmkPMbAl-yUW4HECixTMlSXGjEVQhjSe3CXCxCZiyZccEqFqkIr7OIyeJXmbBuaVwoAyPz40-fa3WAAXKJj9TIzGw2NsbvJDQGoj8ZP6HoOt19QNYJbAl8slwuXp3tKOWGsAgXPvFNjUYKH~UQFw9J~LFYMArwyUWn1XDGB8eW5KGIi9eO3JBQwyuDNHSuqMeVSrxLY2YFMy3JnTnhGN8JUGErGm-LVZAvUcEi1cGYlKbJMmLnddX2KrzNFbSmEIE7y1xta-vCo-KZEMN9WYo0cMAaMxksTifONXDoPPRplHg__",
+      "serial_number": "212121",
+      "description": "Selamat, Anda akan mendapatkan Rabit Cloud Service sebesar 500GB<br><br><b>Cara Gunakan Voucher</b><br><ol><li>Klik tombol salin</li><li>Tukarkan kode ke Rabit</li></ol>",
+      "category": "VT_TUYA",
+      "expired_date": 1632382976,
+      "action_link": "https://google.com",
+      "security_code": "security_code_123",
+      "ribbon_icon_url": "https://file.notion.so/f/f/4d83ebc7-c4c8-4a03-8fe9-9d515853c31c/be9cf1f2-cf89-4b3e-ad9a-c7019fdef805/24px.png?table=block&id=113a17a2-faa0-804f-815c-cfd1afe0da1e&spaceId=4d83ebc7-c4c8-4a03-8fe9-9d515853c31c&expirationTimestamp=1728000000000&signature=IYcAK31jCWGXhfd5FPsCNPtiEoTQVIbeNlfp7AgbvlI&downloadName=24px.png",
+      "ribbon_label": "Digunakan di Rabit",
+      "banner_information": "Dari Plan XL SATU",
+      "validity_label": "Yuk, Aktifkan Segera",
+      "subtitle": "Berlaku 30 Hari",
+      "tnc": "Selamat, Anda akan mendapatkan Rabit Cloud Service sebesar 500GB<br><br><b>Cara Gunakan Voucher</b><br><ol><li>Klik tombol salin</li><li>Tukarkan kode ke Rabit</li></ol>",
+      "voucher_detail_code": [
+        {
+          "label": "Kode Voucher",
+          "value": "TRYU-PHBG-MBLG"
+        }
+      ]
+    }
+  }
+}
