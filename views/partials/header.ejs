@@ -1,0 +1,12 @@
+<header class="header">
+    <div class="header-left">
+        <div id="menu-toggle" class="header-icon">☰</div>
+        <div class="balance" id="user-balance">
+            <%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(user.balance || 0) %>
+        </div>
+    </div>
+    <div class="header-right">
+        <div id="theme-toggle" class="header-icon">☀️</div>
+        <a href="/profile"><div class="profile-pic"></div></a>
+    </div>
+</header>

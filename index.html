@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proses Deposit Pending</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h2 { color: #333; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        label { display: block; margin-bottom: 0.5rem; color: #666; font-size: 0.9rem; }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box; /* Agar padding tidak melebarkan input */
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover { background-color: #218838; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        
+        #result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none; /* Sembunyikan default */
+            font-size: 0.9rem;
+            text-align: left;
+            word-break: break-all;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        pre { margin: 5px 0 0 0; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Cek Deposit Pending</h2>
+        
+        <div class="form-group">
+            <label for="amount">Masukkan Nominal (Amount):</label>
+            <input type="number" id="amount" placeholder="Contoh: 50000" required>
+        </div>
+
+        <button id="btnSubmit" onclick="processDeposit()">Proses Deposit</button>
+
+        <div id="result-area"></div>
+    </div>
+
+    <script>
+        async function processDeposit() {
+            const amountInput = document.getElementById('amount');
+            const resultArea = document.getElementById('result-area');
+            const btnSubmit = document.getElementById('btnSubmit');
+            
+            const amount = amountInput.value;
+
+            // Reset tampilan
+            resultArea.style.display = 'none';
+            resultArea.className = '';
+            resultArea.innerHTML = '';
+
+            // Validasi sederhana
+            if (!amount || amount <= 0) {
+                alert("Harap masukkan nominal yang valid!");
+                return;
+            }
+
+            // UI Loading state
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Memproses...';
+
+            try {
+                // Request ke Backend (sesuaikan port jika berbeda)
+                // Backend Anda menggunakan method GET dan query param ?amount=...
+                const response = await fetch(`/nurul?amount=${amount}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                // Tampilkan hasil
+                resultArea.style.display = 'block';
+                
+                if (response.ok && data.success) {
+                    // Jika Sukses (HTTP 200)
+                    resultArea.classList.add('success');
+                    resultArea.innerHTML = `
+                        <strong>Berhasil!</strong><br>
+                        ${data.message}<br>
+                        <hr style="border-top: 1px solid #c3e6cb;">
+                        <small>Data:</small>
+                        <pre>${JSON.stringify(data.data, null, 2)}</pre>
+                    `;
+                } else {
+                    // Jika Gagal (HTTP 400, 404, 500)
+                    resultArea.classList.add('error');
+                    resultArea.innerHTML = `
+                        <strong>Gagal!</strong><br>
+                        ${data.message || 'Terjadi kesalahan pada server.'}
+                    `;
+                }
+
+            } catch (error) {
+                // Jika server mati atau network error
+                console.error(error);
+                resultArea.style.display = 'block';
+                resultArea.classList.add('error');
+                resultArea.innerHTML = `
+                    <strong>Network Error!</strong><br>
+                    Gagal menghubungi server. Pastikan server Node.js sudah berjalan di port 3001.<br>
+                    <small>${error.message}</small>
+                `;
+            } finally {
+                // Kembalikan tombol ke kondisi semula
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'Proses Deposit';
+            }
+        }
+    </script>
+</body>
+</html>

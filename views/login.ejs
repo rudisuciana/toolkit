@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - WUZZSTORE</title>
+    
+    <link rel="stylesheet" href="/css/style-variables.css">
+    <link rel="stylesheet" href="/css/style-auth.css">
+    <link rel="stylesheet" href="/css/style-components.css">
+</head>
+<body class="auth-page">
+    <div class="stars-bg">
+        <div class="stars"></div>
+        <div class="stars"></div>
+        <div class="stars"></div>
+    </div>
+
+    <div class="auth-container">
+        <h1 class="brand-title">WUZZSTORE</h1>
+        
+        <form action="/api/login" method="POST">
+            <div class="form-group">
+                <label for="username" style="text-align: left;">Username</label>
+                <input type="text" id="username" name="username" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label for="password" style="text-align: left;">Password</label>
+                <input type="password" id="password" name="password" class="form-input" required>
+            </div>
+            
+            <div style="text-align: right; margin-bottom: 15px; font-size: 0.9rem;">
+                <a href="/forgot-password" style="color: #5c67f2; text-decoration: none;">Lupa password?</a>
+            </div>
+            
+            <button type="submit" class="btn">Login</button>
+        </form>
+        
+        <p style="margin-top: 15px; font-size: 0.9rem; color: #555;">
+            Belum punya akun? <a href="/register" style="color: #5c67f2; text-decoration: none; font-weight: bold;">Register di sini</a>
+        </p>
+    </div>
+</body>
+</html>

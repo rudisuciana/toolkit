@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek Paket - WUZZSTORE</title>
+    
+    <link rel="stylesheet" href="/css/style-variables.css">
+    <link rel="stylesheet" href="/css/style-layout.css">
+    <link rel="stylesheet" href="/css/style-components.css">
+    <link rel="stylesheet" href="/css/style-pages.css">
+    <link rel="stylesheet" href="/css/style-dark.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="dashboard">
+
+    <%- include('partials/sidebar', { user: user }) %>
+    <%- include('partials/header', { user: user }) %>
+
+    <main class="main-content">
+        
+        <div class="profile-card">
+            <h2><i class="fas fa-search"></i> Cek Paket</h2>
+            <p class="topup-subtitle">Masukkan nomor telepon untuk melihat detail paket aktif.</p>
+            
+            <div id="message-display" style="margin-bottom: 15px; font-weight: bold; text-align: center;"></div>
+            
+            <form id="checkPackageForm">
+                <div class="form-group">
+                    <label for="nomorInput">Nomor Telepon</label>
+                    <input type="tel" id="nomorInput" name="number" placeholder="Contoh: 081234567890" class="form-input" required>
+                </div>
+                <button type="submit" id="checkButton" class="btn btn-success" style="margin-top: 15px;">
+                    <i class="fas fa-search"></i> Cek Sekarang
+                </button>
+            </form>
+        </div>
+
+        <div id="subs-info-container" class="profile-card" style="display: none;">
+            <h3><i class="fas fa-user-check"></i> Info Pelanggan</h3>
+            <dl id="subs-info-list" class="subs-info-list">
+                </dl>
+        </div>
+
+        <div id="package-results-container" class="profile-card" style="display: none;">
+            <h3><i class="fas fa-box-open"></i> Info Paket Aktif</h3>
+            <div id="package-list" style="margin-top: 15px;">
+                </div>
+        </div>
+    </main>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inisialisasi Elemen DOM
+            const checkPackageForm = document.getElementById('checkPackageForm');
+            const nomorInput = document.getElementById('nomorInput');
+            const messageDisplay = document.getElementById('message-display');
+            const checkButton = document.getElementById('checkButton');
+            const subsInfoContainer = document.getElementById('subs-info-container');
+            const subsInfoList = document.getElementById('subs-info-list');
+            const packageResultsContainer = document.getElementById('package-results-container');
+            const packageList = document.getElementById('package-list');
+
+            // Helper: Menampilkan pesan status
+            const showMessage = (text, isError = false) => {
+                messageDisplay.textContent = text;
+                messageDisplay.style.color = isError ? '#d9534f' : '#5cb85c';
+            };
+
+            // Event Listener: Format input nomor otomatis (Hapus spasi/-, ubah 0 ke 62)
+            nomorInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[\s+-]/g, '');
+                if (this.value.startsWith('0')) {
+                    this.value = '62' + this.value.substring(1);
+                }
+            });
+
+            // Fungsi: Menampilkan Info Pelanggan ke HTML
+            const displaySubsInfo = (info) => {
+                if (!info) return;
+                subsInfoList.innerHTML = `
+                    <dt>Nomor:</dt><dd>${info.msisdn || '-'}</dd>
+                    <dt>Operator:</dt><dd>${info.operator || '-'}</dd>
+                    <dt>Terverifikasi:</dt><dd>${info.id_verified || '-'}</dd>
+                    <dt>Jaringan:</dt><dd>${info.net_type || '-'}</dd>
+                    <dt>Masa Aktif:</dt><dd>${info.tenure || '-'}</dd>
+                    <dt>Expired:</dt><dd>${info.exp_date || '-'}</dd>
+                    <dt>Masa Tenggang:</dt><dd>${info.grace_until || '-'}</dd>
+                `;
+                subsInfoContainer.style.display = 'block';
+            };
+
+            // Fungsi: Menampilkan Info Paket ke HTML (Menggunakan style quota-item dari CSS)
+            const displayPackageInfo = (info) => {
+                if (!info || !info.packages || info.packages.length === 0) {
+                    packageList.innerHTML = `<p class="tembak-info-box error">${info.error_message || 'Tidak ada paket aktif yang ditemukan.'}</p>`;
+                    packageResultsContainer.style.display = 'block';
+                    return;
+                }
+                
+                packageList.innerHTML = info.packages.map(pkg => `
+                  <div class="quota-item">
+                    <div class="quota-header">
+                      <span>${pkg.name}</span>
+                      <span>Exp: ${pkg.expiry}</span>
+                    </div>
+                    <div class="quota-details">
+                      <ul>
+                        ${pkg.quotas.map(q => `
+                          <li>
+                            <span class="quota-label">${q.name}</span>
+                            <div class="quota-value-container">
+                              <span class="val-remain">${q.remaining}</span>
+                              <span class="val-divider">/</span>
+                              <span class="val-total">${q.total}</span>
+                            </div>
+                          </li>
+                        `).join('')}
+                      </ul>
+                    </div>
+                  </div>
+                `).join('');
+                packageResultsContainer.style.display = 'block';
+            };
+
+            // Event Delegation: Accordion untuk detail paket
+            packageList.addEventListener('click', (e) => {
+                const header = e.target.closest('.quota-header');
+                if (header) {
+                    const item = header.closest('.quota-item');
+                    if (item) {
+                        item.classList.toggle('active');
+                    }
+                }
+            });
+
+            // Event Listener: Submit Form
+            checkPackageForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const number = nomorInput.value;
+                if (!number) {
+                    showMessage('Nomor tidak boleh kosong.', true);
+                    return;
+                }
+
+                // Reset Tampilan
+                showMessage('Sedang mengambil data...', false);
+                subsInfoContainer.style.display = 'none';
+                packageResultsContainer.style.display = 'none';
+                checkButton.disabled = true;
+                checkButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengecek...';
+
+                try {
+                    // Request ke API Backend
+                    const response = await fetch('/api/check-package', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ number })
+                    });
+
+                    const result = await response.json();
+                    
+                    // Validasi Response
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.message || 'Terjadi kesalahan saat mengambil data.');
+                    }
+                    
+                    // Tampilkan Hasil
+                    showMessage('', false); 
+                    displaySubsInfo(result.data.subs_info);
+                    displayPackageInfo(result.data.package_info);
+
+                } catch (error) {
+                    showMessage(error.message, true);
+                } finally {
+                    checkButton.disabled = false;
+                    checkButton.innerHTML = '<i class="fas fa-search"></i> Cek Sekarang';
+                }
+            });
+        });
+    </script>
+    
+    <script src="/js/sidebar.js"></script>
+    <script src="/js/theme.js"></script>
+    <script src="/js/submenu.js"></script>
+</body>
+</html>

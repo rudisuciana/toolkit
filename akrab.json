@@ -1,0 +1,56 @@
+[
+  {
+    "code": "XLA14",
+    "name": "SuperMini PROMO",
+    "harga": 43000,
+    "area1": "13 - 15 GB",
+    "area2": "15 - 17 GB",
+    "area3": "20 - 22 GB",
+    "area4": "30 - 32 GB"
+  },
+  {
+    "code": "XLA89",
+    "name": "MegaBig",
+    "harga": 93000,
+    "area1": "88 GB - 90 GB",
+    "area2": "90 GB - 92 GB",
+    "area3": "95 GB - 97 GB",
+    "area4": "105 GB - 107 GB"
+  },
+  {
+    "code": "XLA32",
+    "name": "Mini",
+    "harga": 55500,
+    "area1": "31.75 GB - 33.75 GB",
+    "area2": "33.75 - 35.75 GB",
+    "area3": "38.75 - 40.75 GB",
+    "area4": "48.75 - 50.75 GB"
+  },
+  {
+    "code": "XLA39",
+    "name": "Big",
+    "harga": 60000,
+    "area1": "38 GB - 40 GB",
+    "area2": "40 GB - 42 GB",
+    "area3": "45 GB - 47 GB",
+    "area4": "55 GB - 57 GB"
+  },
+  {
+    "code": "XLA51",
+    "name": "Jumbo V2",
+    "harga": 70000,
+    "area1": "50.5 - 52.5 GB",
+    "area2": "52.5 - 54.5 GB",
+    "area3": "57.5 - 59.5 GB",
+    "area4": "67.5 - 69.5 GB"
+  },
+  {
+    "code": "XLA65",
+    "name": "Jumbo",
+    "harga": 90000,
+    "area1": "65.5 - 67.5 GB",
+    "area2": "70 - 72 GB",
+    "area3": "83 - 85 GB",
+    "area4": "123 - 125 GB"
+  }
+]

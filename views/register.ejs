@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - WUZZSTORE</title>
+    
+    <link rel="stylesheet" href="/css/style-variables.css">
+    <link rel="stylesheet" href="/css/style-auth.css">
+    <link rel="stylesheet" href="/css/style-components.css">
+</head>
+<body>
+    <div class="stars-bg">
+        <div class="stars"></div>
+        <div class="stars"></div>
+        <div class="stars"></div>
+    </div>
+
+    <div class="auth-container">
+        <h1 class="brand-title">WUZZSTORE</h1>
+        
+        <form action="/api/register" method="POST">
+            <div class="form-group">
+                <label for="username" style="text-align: left;">Username</label>
+                <input type="text" id="username" name="username" class="form-input" placeholder="Pilih username unik" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone" style="text-align: left;">Nomor HP</label>
+                <input type="tel" id="phone" name="phone" class="form-input" placeholder="Contoh: 08123456789" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email" style="text-align: left;">Email</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="email@contoh.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" style="text-align: left;">Password</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="Buat password kuat" required>
+            </div>
+            
+            <button type="submit" class="btn">Register</button>
+        </form>
+        
+        <p style="margin-top: 15px; font-size: 0.9rem; color: #555;">
+            Sudah punya akun? <a href="/login" style="color: #5c67f2; text-decoration: none; font-weight: bold;">Login di sini</a>
+        </p>
+    </div>
+</body>
+</html>

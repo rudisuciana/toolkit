@@ -1,0 +1,25 @@
+<nav id="sidebar" class="sidebar">
+    <div class="sidebar-header"><h1 class="brand-title">WUZZSTORE</h1></div>
+    <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="/riwayat"><i class="fas fa-history"></i> Riwayat</a>
+    <a href="/topup"><i class="fas fa-wallet"></i> Top Up</a>
+    <a href="/cek-paket"><i class="fas fa-box-open"></i> Cek Paket</a>
+    <a href="/profile"><i class="fas fa-cog"></i> Pengaturan</a>
+    <a href="https://wa.me/6287897190671"><i class="fas fa-phone"></i> Contact</a>
+    <div class="has-submenu">
+        <div class="main-menu-link"><span><i class="fas fa-mobile-alt"></i>  XL Axiata</span><i class="fas fa-chevron-right dropdown-icon"></i></div>
+        <ul class="submenu">
+            <li><a href="/xl-auth">XL Auth</a></li>
+            <li><a href="/xl-tembak">XL Tembak</a></li>
+            <li><a href="/xl-akrabv1">XL Akrab V1</a></li>
+            <li><a href="/xl-akrabv2">XL Akrab V2</a></li>
+            <li><a href="/xl-akrabv3">XL Akrab V3</a></li>
+        </ul>
+    </div>
+    <a href="/no-otp"><i class="fas fa-globe"></i> No OTP</a>
+    <% if (user && user.isAdmin) { %>
+        <a href="/admin"><i class="fas fa-user-shield"></i> Admin</a>
+    <% } %>
+    <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+</nav>
+<div id="overlay" class="overlay"></div>

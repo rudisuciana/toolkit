@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XL Akrab V1 - WUZZSTORE</title>
+    
+    <link rel="stylesheet" href="/css/style-variables.css">
+    <link rel="stylesheet" href="/css/style-layout.css">
+    <link rel="stylesheet" href="/css/style-components.css">
+    <link rel="stylesheet" href="/css/style-pages.css">
+    <link rel="stylesheet" href="/css/style-dark.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+<body class="dashboard">
+
+    <%- include('partials/sidebar', { user: user }) %>
+    <%- include('partials/header', { user: user }) %>
+
+    <main class="main-content">
+        <div class="profile-card">
+            <h2><i class="fas fa-users"></i> XL Akrab V1</h2>
+            <p class="topup-subtitle">Masukkan nomor XL yang ingin diundang ke grup Akrab.</p>
+            
+            <div id="message-display" class="tembak-info-box" style="display: none; margin-bottom: 15px;"></div>
+            
+            <form id="checkAkrabForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="nomorInput">Nomor XL Target</label>
+                    <input type="tel" id="nomorInput" name="number" placeholder="Contoh: 0878..." class="form-input" autocomplete="off" required>
+                </div>
+            </form>
+        </div>
+
+        <div id="products-container" class="profile-card" style="display: none; margin-top: 20px;">
+            <h3><i class="fas fa-box-open"></i> Stok Produk Akrab</h3>
+            <div class="tab-container">
+                <button class="tab-button active" data-tab="fresh">Fresh</button>
+                <button class="tab-button" data-tab="bekasan">Bekasan</button>
+            </div>
+            <div id="tab-content">
+                <div id="fresh-products" class="tab-pane active"></div>
+                <div id="bekasan-products" class="tab-pane"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="akrabModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close-btn">&times;</span>
+            
+            <div id="buyView">
+                <h3>KONFIRMASI INVITE</h3>
+                <hr style="margin-bottom: 20px; border-color: var(--border-color-light);">
+                <form id="buyForm" data-code="">
+                    <div class="form-group">
+                        <label>Nama Produk</label>
+                        <input id="modalAkrabNama" class="form-input" type="text" readonly disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Nomor Target</label>
+                        <input id="modalAkrabNomor" class="form-input" type="text" readonly disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Pengelola (Wajib Diisi)</label>
+                        <input id="modalAkrabParentName" class="form-input" type="text" required placeholder="Contoh: Asep">
+                    </div>
+                    <div class="form-group">
+                        <label>Harga</label>
+                        <input id="modalAkrabHarga" class="form-input" type="text" readonly disabled style="color: var(--primary-color); font-weight: 700;">
+                    </div>
+                    <div class="form-group">
+                        <label>Deskripsi</label>
+                        <div id="modalDescription" class="description-box"></div>
+                    </div>
+                    <div class="modal-button-container">
+                        <button type="button" class="btn closeModalBtn btn-danger">Batal</button>
+                        <button type="submit" id="buyButton" class="btn btn-success">Proses Invite</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="detailView" style="display: none;">
+                <div class="modal-title-container">
+                    <h3>DETAIL TRANSAKSI</h3>
+                    <div class="loading-line"></div>
+                </div>
+                <hr style="margin-bottom: 20px; border-color: var(--border-color-light);">
+                <form id="detailForm">
+                    <div class="form-group"><label>Ref ID</label><input id="detailRefId" class="form-input" readonly disabled></div>
+                    <div class="form-group"><label>Nomor</label><input id="detailNomor" class="form-input" readonly disabled></div>
+                    <div class="form-group"><label>Nama Produk</label><input id="detailNamaProduk" class="form-input" readonly disabled></div>
+                    <div class="form-group"><label>Nama Pengelola</label><input id="detailParentName" class="form-input" readonly disabled></div>
+                    <div class="form-group"><label>Harga</label><input id="detailHarga" class="form-input" readonly disabled></div>
+                    <div class="form-group"><label>Status</label><input id="detailStatus" class="form-input" readonly disabled style="font-weight: bold;"></div>
+                    <div class="form-group"><label>Pesan Provider</label><textarea id="detailMessage" class="form-input" readonly disabled rows="2"></textarea></div>
+                    <button type="button" class="btn closeModalBtn btn-secondary" style="margin-top: 15px;">Tutup</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nomorInput = document.getElementById('nomorInput');
+            const messageDisplay = document.getElementById('message-display');
+            const productsContainer = document.getElementById('products-container');
+            const freshProductsContainer = document.getElementById('fresh-products');
+            const bekasanProductsContainer = document.getElementById('bekasan-products');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            
+            const detailModal = document.getElementById('akrabModal');
+            const closeModalBtns = document.querySelectorAll('.modal-close-btn, .closeModalBtn');
+            const buyView = document.getElementById('buyView');
+            const detailView = document.getElementById('detailView');
+            const buyForm = document.getElementById('buyForm');
+            const buyButton = document.getElementById('buyButton');
+
+            let debounceTimer;
+            let allProducts = [];
+            let pollingInterval = null;
+
+            const showMessage = (text, type = 'info') => {
+                messageDisplay.textContent = text;
+                messageDisplay.className = `tembak-info-box ${type}`;
+                messageDisplay.style.display = text ? 'block' : 'none';
+            };
+
+            const formatCurrency = (amount) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+
+            const updateBalance = () => {
+                const userBalanceElement = document.getElementById('user-balance');
+                if (userBalanceElement) {
+                    fetch('/api/user').then(res => res.json()).then(data => {
+                        if (data && data.balance != null) userBalanceElement.textContent = formatCurrency(data.balance);
+                    });
+                }
+            };
+
+            const cekNomorXl = (nomor) => {
+                const cleaned = String(nomor).replace(/[\s+-]/g, '');
+                if (!cleaned.startsWith('08')) return false;
+                const prefixXl = ['817', '818', '819', '859', '877', '878', '838', '831', '832', '833'];
+                return prefixXl.includes(cleaned.substring(1, 4));
+            };
+
+            const renderProductList = (products, targetContainer) => {
+                targetContainer.innerHTML = '';
+                if (!products || products.length === 0) {
+                    targetContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted-light); padding: 20px;">Tidak ada produk tersedia.</p>`;
+                    return;
+                }
+
+                targetContainer.innerHTML = products.map(product => `
+                    <div class="product-item" data-code="${product.code}" style="cursor: pointer;">
+                        <table>
+                            <tr>
+                                <td class="product-name">
+                                    ${product.name}
+                                    <div style="font-size: 0.8rem; color: var(--text-muted-light); margin-top: 5px;">
+                                        Stok: <strong style="color: ${product.stock > 0 ? '#10b981' : '#ef4444'};">${product.stock}</strong>
+                                    </div>
+                                </td>
+                                <td class="product-fee-info">
+                                    <span class="product-fee-label">Harga</span>
+                                    <div class="product-fee-value">${formatCurrency(product.price)}</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                `).join('');
+            };
+
+            const displayProducts = (products) => {
+                allProducts = products || [];
+                const freshProducts = products.filter(p => p.code.toUpperCase().includes('XLF'));
+                const bekasanProducts = products.filter(p => !p.code.toUpperCase().includes('XLF'));
+                renderProductList(freshProducts, freshProductsContainer);
+                renderProductList(bekasanProducts, bekasanProductsContainer);
+            };
+
+            const fetchStock = async () => {
+                showMessage('Mengecek ketersediaan stok...', 'info');
+                productsContainer.style.display = 'block';
+                const spinnerHTML = '<div class="spinner" style="margin: 20px auto;"></div>';
+                freshProductsContainer.innerHTML = spinnerHTML;
+                bekasanProductsContainer.innerHTML = spinnerHTML;
+
+                try {
+                    const response = await fetch('/api/xl/akrab-stock', { method: 'POST' });
+                    const result = await response.json();
+                    if (!response.ok || !result.success) throw new Error(result.message);
+                    showMessage('', 'info');
+                    displayProducts(result.data);
+                } catch (error) {
+                    showMessage(`Gagal: ${error.message}`, 'error');
+                    productsContainer.style.display = 'none';
+                }
+            };
+
+            nomorInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.startsWith('62')) this.value = '0' + this.value.substring(2);
+                clearTimeout(debounceTimer);
+                const value = this.value;
+                if (value.length >= 4) {
+                    debounceTimer = setTimeout(() => {
+                        if (cekNomorXl(value)) fetchStock();
+                        else { showMessage('Bukan nomor XL/Axis.', 'error'); productsContainer.style.display = 'none'; }
+                    }, 500);
+                } else {
+                    showMessage('', 'info');
+                    productsContainer.style.display = 'none';
+                }
+            });
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+                    button.classList.add('active');
+                    document.getElementById(button.getAttribute('data-tab') + '-products').classList.add('active');
+                });
+            });
+
+            productsContainer.addEventListener('click', (e) => {
+                const productItem = e.target.closest('.product-item');
+                if (!productItem) return;
+                const product = allProducts.find(p => p.code === productItem.dataset.code);
+
+                if (product) {
+                    buyForm.dataset.code = product.code;
+                    document.getElementById('modalAkrabNomor').value = nomorInput.value;
+                    document.getElementById('modalAkrabNama').value = product.name;
+                    document.getElementById('modalAkrabParentName').value = '';
+                    document.getElementById('modalAkrabHarga').value = formatCurrency(product.price);
+                    
+                    let descHtml = '';
+                    if (Array.isArray(product.description)) descHtml = `<ul>${product.description.map(d => `<li>${d}</li>`).join('')}</ul>`;
+                    else if (typeof product.description === 'string') descHtml = product.description.replace(/\n/g, '<br>');
+                    document.getElementById('modalDescription').innerHTML = descHtml;
+                    
+                    buyView.style.display = 'block'; detailView.style.display = 'none';
+                    detailModal.style.display = 'block';
+                }
+            });
+            
+            const startPolling = (ref_id) => {
+                if (pollingInterval) clearInterval(pollingInterval);
+                pollingInterval = setInterval(async () => {
+                    try {
+                        const res = await fetch(`/api/transaction/status/${ref_id}`);
+                        if (!res.ok) { clearInterval(pollingInterval); return; }
+                        const data = await res.json();
+                        
+                        const statusInput = document.getElementById('detailStatus');
+                        const messageInput = document.getElementById('detailMessage');
+                        const loadingLine = document.querySelector('#detailView .loading-line');
+                        
+                        if (messageInput && data.message) messageInput.value = data.message;
+                        if (statusInput && statusInput.value.toLowerCase() !== data.status.toLowerCase()) {
+                            statusInput.value = data.status.toUpperCase();
+                            if (['success', 'sukses', 'failed', 'gagal'].includes(data.status.toLowerCase())) {
+                                clearInterval(pollingInterval);
+                                if (loadingLine) loadingLine.style.display = 'none';
+                                if(['failed', 'gagal'].includes(data.status.toLowerCase())) updateBalance();
+                            }
+                        }
+                    } catch (error) { clearInterval(pollingInterval); }
+                }, 5000);
+            };
+
+            buyForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const code = buyForm.dataset.code;
+                const parent_name = document.getElementById('modalAkrabParentName').value;
+                const destination = document.getElementById('modalAkrabNomor').value;
+                if (!parent_name.trim()) return alert('Nama Pengelola wajib diisi.');
+
+                buyButton.disabled = true; buyButton.textContent = 'Memproses...';
+                try {
+                    const response = await fetch('/api/xl/akrab/invite', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code, parent_name, destination })
+                    });
+                    const result = await response.json();
+                    if (!response.ok || !result.success) throw new Error(result.message);
+                    
+                    document.getElementById('detailRefId').value = result.data.ref_id || '-';
+                    document.getElementById('detailNomor').value = result.data.destination;
+                    document.getElementById('detailNamaProduk').value = document.getElementById('modalAkrabNama').value;
+                    document.getElementById('detailParentName').value = parent_name;
+                    document.getElementById('detailHarga').value = document.getElementById('modalAkrabHarga').value;
+                    document.getElementById('detailStatus').value = result.data.status.toUpperCase();
+                    document.getElementById('detailMessage').value = result.data.message;
+                    
+                    buyView.style.display = 'none'; detailView.style.display = 'block';
+                    updateBalance();
+                    
+                    if (result.data.ref_id && !['success', 'failed'].includes(result.data.status)) {
+                        document.querySelector('#detailView .loading-line').style.display = 'block';
+                        startPolling(result.data.ref_id);
+                    } else document.querySelector('#detailView .loading-line').style.display = 'none';
+                } catch (error) { alert(error.message); detailModal.style.display = 'none'; } 
+                finally { buyButton.disabled = false; buyButton.textContent = 'Proses Invite'; }
+            });
+
+            const hideModal = () => { if (pollingInterval) clearInterval(pollingInterval); detailModal.style.display = 'none'; };
+            closeModalBtns.forEach(btn => btn.addEventListener('click', hideModal));
+            window.addEventListener('click', (e) => { if (e.target == detailModal) hideModal(); });
+        });
+    </script>
+    <script src="/js/sidebar.js"></script>
+    <script src="/js/theme.js"></script>
+    <script src="/js/submenu.js"></script>
+</body>
+</html>

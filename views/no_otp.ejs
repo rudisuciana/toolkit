@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produk No OTP - WUZZSTORE</title>
+    
+    <link rel="stylesheet" href="/css/style-variables.css">
+    <link rel="stylesheet" href="/css/style-layout.css">
+    <link rel="stylesheet" href="/css/style-components.css">
+    <link rel="stylesheet" href="/css/style-pages.css">
+    <link rel="stylesheet" href="/css/style-dark.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+<body class="dashboard">
+
+    <%- include('partials/sidebar', { user: user }) %>
+    <%- include('partials/header', { user: user }) %>
+
+    <main class="main-content">
+        <div class="profile-card">
+            <h2><i class="fas fa-bolt"></i> Produk No OTP</h2>
+            <p class="topup-subtitle">Masukkan nomor tujuan. Sistem akan mendeteksi provider dan kategori secara otomatis.</p>
+            
+            <div id="message-display" class="tembak-info-box" style="display: none; margin-bottom: 15px;"></div>
+            
+            <form id="checkNoOtpForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="nomorInput">Nomor Tujuan</label>
+                    <input type="tel" id="nomorInput" name="number" placeholder="Contoh: 081234567890" class="form-input" autocomplete="off" required>
+                </div>
+            </form>
+        </div>
+
+        <div id="products-container" class="profile-card" style="max-width: 900px; display: none; margin-top: 20px;">
+            <h3 id="provider-title"><i class="fas fa-box-open"></i> Daftar Produk</h3>
+            
+            <div id="tabs-header" class="tab-container" style="overflow-x: auto; white-space: nowrap; padding-bottom: 5px;"></div>
+            
+            <div id="tabs-content"></div>
+        </div>
+    </main>
+
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close-btn">&times;</span>
+            
+            <div id="buyView">
+                <h3>KONFIRMASI PEMBELIAN</h3>
+                <hr style="margin-bottom: 20px; border-color: var(--border-color-light);">
+                <form id="buyForm" data-code="">
+                    <div class="form-group">
+                        <label>Nomor Tujuan</label>
+                        <input id="modalNomor" class="form-input" type="text" readonly disabled style="font-weight: bold;">
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Produk</label>
+                        <input id="modalNamaProduk" class="form-input" type="text" readonly disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <input id="modalKategori" class="form-input" type="text" readonly disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Harga</label>
+                        <input id="modalHarga" class="form-input" type="text" readonly disabled style="color: var(--primary-color); font-weight: 700;">
+                    </div>
+                    <div class="form-group">
+                        <label>Deskripsi</label>
+                        <div id="modalDescription" class="description-box"></div>
+                    </div>
+
+                    <div class="modal-button-container">
+                        <button type="button" class="btn closeModalBtn btn-danger">Batal</button>
+                        <button type="submit" id="buyButton" class="btn btn-success">Beli Sekarang</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="detailView" style="display: none;">
+                <div class="modal-title-container">
+                    <h3>DETAIL TRANSAKSI</h3>
+                    <div class="loading-line"></div>
+                </div>
+                <hr style="margin-bottom: 20px; border-color: var(--border-color-light);">
+                <form id="detailForm">
+                    <div class="form-group"><label>Ref ID</label><input id="detailRefId" class="form-input" readonly disabled></div>
+                    <div class="form-group"><label>Nomor</label><input id="detailNomor" class="form-input" readonly disabled></div>
+                    <div class="form-group"><label>Produk</label><input id="detailNamaProduk" class="form-input" readonly disabled></div>
+                    <div class="form-group"><label>Harga</label><input id="detailHarga" class="form-input" readonly disabled></div>
+                    <div class="form-group"><label>Status</label><input id="detailStatus" class="form-input" readonly disabled style="font-weight: bold;"></div>
+                    <div class="form-group"><label>Pesan Sistem</label><textarea id="detailMessage" class="form-input" readonly disabled rows="2"></textarea></div>
+                    
+                    <button type="button" class="btn closeModalBtn btn-secondary" style="margin-top: 15px;">Tutup</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="txErrorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-icon" style="color: #d9534f; font-size: 4rem; margin-bottom: 15px;"><i class="fas fa-times-circle"></i></div>
+            <h4>Transaksi Gagal</h4>
+            <p id="txErrorMessage" style="color: #555;">Terjadi kesalahan.</p>
+            <button type="button" id="closeTxErrorModalBtn" class="btn btn-danger" style="max-width: 200px; margin: 20px auto 0;">OK</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const nomorInput = document.getElementById('nomorInput');
+            const messageDisplay = document.getElementById('message-display');
+            const productsContainer = document.getElementById('products-container');
+            const providerTitle = document.getElementById('provider-title');
+            const tabsHeader = document.getElementById('tabs-header');
+            const tabsContent = document.getElementById('tabs-content');
+            
+            const detailModal = document.getElementById('productModal');
+            const closeModalBtns = document.querySelectorAll('.modal-close-btn, .closeModalBtn');
+            const buyView = document.getElementById('buyView');
+            const detailView = document.getElementById('detailView');
+            const buyForm = document.getElementById('buyForm');
+            const buyButton = document.getElementById('buyButton');
+            
+            const txErrorModal = document.getElementById('txErrorModal');
+            const txErrorMessage = document.getElementById('txErrorMessage');
+            const closeTxErrorModalBtn = document.getElementById('closeTxErrorModalBtn');
+
+            let debounceTimer;
+            let allProducts = [];
+            let currentProvider = '';
+            let pollingInterval = null;
+
+            // --- Helpers ---
+            const formatCurrency = (amount) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+
+            const showMessage = (text, type = 'info') => {
+                messageDisplay.textContent = text;
+                messageDisplay.className = `tembak-info-box ${type}`;
+                messageDisplay.style.display = text ? 'block' : 'none';
+            };
+
+            const updateBalance = () => {
+                const userBalanceElement = document.getElementById('user-balance');
+                if (userBalanceElement) {
+                    fetch('/api/user').then(res => res.json()).then(data => {
+                        if (data && data.balance != null) userBalanceElement.textContent = formatCurrency(data.balance);
+                    });
+                }
+            };
+
+            const getProvider = (nomor) => {
+                if (!nomor || nomor.length < 4) return null;
+                const prefix4 = nomor.substring(0, 4);
+                if (['0811', '0812', '0813', '0821', '0822', '0823', '0852', '0853', '0851'].includes(prefix4)) return 'TELKOMSEL';
+                if (['0814', '0815', '0816', '0855', '0856', '0857', '0858'].includes(prefix4)) return 'INDOSAT';
+                if (['0817', '0818', '0819', '0859', '0877', '0878'].includes(prefix4)) return 'XL';
+                if (['0831', '0832', '0833', '0838'].includes(prefix4)) return 'AXIS';
+                if (['0895', '0896', '0897', '0898', '0899'].includes(prefix4)) return 'TRI';
+                if (['0881', '0882', '0883', '0884', '0885', '0886', '0887', '0888', '0889'].includes(prefix4)) return 'SMARTFREN';
+                return null;
+            };
+
+            // --- Logic Render Produk dengan TAB Dinamis ---
+            const displayProducts = (products) => {
+                allProducts = products;
+                tabsHeader.innerHTML = '';
+                tabsContent.innerHTML = '';
+
+                if (!products || products.length === 0) {
+                    tabsContent.innerHTML = `<p style="text-align: center; color: var(--text-muted-light); padding: 20px;">Tidak ada produk ditemukan.</p>`;
+                    return;
+                }
+
+                // 1. Ambil Kategori Unik
+                const categories = [...new Set(products.map(p => p.category || 'Umum'))].sort();
+
+                // 2. Buat Tabs & Content Area
+                categories.forEach((category, index) => {
+                    // Buat Tombol Tab
+                    const btn = document.createElement('button');
+                    btn.className = `tab-button ${index === 0 ? 'active' : ''}`;
+                    btn.textContent = category.toUpperCase();
+                    btn.dataset.tab = `tab-${index}`;
+                    btn.onclick = () => switchTab(btn, `tab-${index}`);
+                    tabsHeader.appendChild(btn);
+
+                    // Buat Konten Tab (Grid Produk)
+                    const contentDiv = document.createElement('div');
+                    contentDiv.id = `tab-${index}`;
+                    contentDiv.className = `tab-pane ${index === 0 ? 'active' : ''}`;
+                    
+                    // Filter produk per kategori
+                    const catProducts = products.filter(p => (p.category || 'Umum') === category);
+                    
+                    // Render Grid Item (Menggunakan inline style grid untuk override jika ID bentrok)
+                    contentDiv.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px;">
+                        ${catProducts.map(p => `
+                        <div class="product-item" data-code="${p.product_id}" style="cursor: pointer;">
+                            <table>
+                                <tr>
+                                    <td class="product-name">
+                                        ${p.product_name}
+                                        <div style="font-size: 0.8rem; color: var(--text-muted-light); margin-top: 5px;">
+                                            ${p.provider}
+                                        </div>
+                                    </td>
+                                    <td class="product-fee-info">
+                                        <span class="product-fee-label">Harga</span>
+                                        <div class="product-fee-value">${formatCurrency(p.final_price)}</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        `).join('')}
+                    </div>`;
+                    
+                    tabsContent.appendChild(contentDiv);
+                });
+            };
+
+            // Fungsi Ganti Tab
+            const switchTab = (btnElement, tabId) => {
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                
+                btnElement.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            };
+
+            // --- Fetch Data ---
+            const fetchProducts = async (provider) => {
+                if (currentProvider === provider) return;
+                currentProvider = provider;
+
+                showMessage(`Mendeteksi ${provider}, memuat produk...`, 'info');
+                productsContainer.style.display = 'block';
+                providerTitle.innerHTML = `<i class="fas fa-box-open"></i> ${provider}`;
+                tabsHeader.innerHTML = '';
+                tabsContent.innerHTML = '<div class="spinner" style="margin: 30px auto;"></div>';
+
+                try {
+                    const response = await fetch('/api/no-otp/products', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ provider })
+                    });
+                    const result = await response.json();
+                    if (!response.ok || !result.success) throw new Error(result.message);
+                    
+                    showMessage('', 'info');
+                    displayProducts(result.data);
+
+                } catch (error) {
+                    showMessage(error.message, 'error');
+                    productsContainer.style.display = 'none';
+                    currentProvider = '';
+                }
+            };
+
+            // --- Input Listener ---
+            nomorInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.startsWith('62')) this.value = '0' + this.value.substring(2);
+
+                clearTimeout(debounceTimer);
+                const value = this.value;
+
+                if (value.length >= 4) {
+                    debounceTimer = setTimeout(() => {
+                        const provider = getProvider(value);
+                        if (provider) {
+                            fetchProducts(provider);
+                        } else {
+                            if(value.length > 4) {
+                                showMessage('Provider tidak dikenali.', 'error');
+                                productsContainer.style.display = 'none';
+                                currentProvider = '';
+                            }
+                        }
+                    }, 300);
+                } else {
+                    showMessage('', 'info');
+                    productsContainer.style.display = 'none';
+                    currentProvider = '';
+                }
+            });
+
+            // --- Modal Interaction (FIXED) ---
+            tabsContent.addEventListener('click', (e) => {
+                const item = e.target.closest('.product-item');
+                if (!item) return;
+                
+                const productCode = item.dataset.code;
+                // FIXED: Gunakan loose equality (==) karena productCode dari HTML adalah string, tapi di DB mungkin int
+                const product = allProducts.find(p => p.product_id == productCode);
+
+                if (product) {
+                    buyForm.dataset.code = product.product_id;
+                    document.getElementById('modalNomor').value = nomorInput.value;
+                    document.getElementById('modalNamaProduk').value = product.product_name;
+                    document.getElementById('modalKategori').value = product.category || '-';
+                    document.getElementById('modalHarga').value = formatCurrency(product.final_price);
+                    document.getElementById('modalDescription').textContent = product.description || 'Tidak ada deskripsi.';
+                    
+                    buyView.style.display = 'block'; 
+                    detailView.style.display = 'none';
+                    detailModal.style.display = 'block';
+                }
+            });
+
+            // --- Polling Status ---
+            const startPolling = (ref_id) => {
+                if (pollingInterval) clearInterval(pollingInterval);
+                pollingInterval = setInterval(async () => {
+                    try {
+                        const res = await fetch(`/api/transaction/status/${ref_id}`);
+                        if (!res.ok) { clearInterval(pollingInterval); return; }
+                        const data = await res.json();
+                        
+                        const statusInput = document.getElementById('detailStatus');
+                        const messageInput = document.getElementById('detailMessage');
+                        const loadingLine = document.querySelector('#detailView .loading-line');
+
+                        if (messageInput && data.message) messageInput.value = data.message;
+
+                        if (statusInput && statusInput.value.toLowerCase() !== data.status.toLowerCase()) {
+                            statusInput.value = data.status.toUpperCase();
+                            const finalStatus = ['success', 'sukses', 'failed', 'gagal'];
+                            if (finalStatus.includes(data.status.toLowerCase())) {
+                                clearInterval(pollingInterval);
+                                if (loadingLine) loadingLine.style.display = 'none';
+                                if(['failed', 'gagal'].includes(data.status.toLowerCase())) updateBalance();
+                            }
+                        }
+                    } catch (error) { clearInterval(pollingInterval); }
+                }, 5000);
+            };
+
+            buyForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const code = buyForm.dataset.code;
+                const destination = document.getElementById('modalNomor').value;
+
+                buyButton.disabled = true; buyButton.textContent = 'Memproses...';
+
+                try {
+                    const response = await fetch('/api/no-otp/order', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code, destination })
+                    });
+                    const result = await response.json();
+                    if (!response.ok || !result.success) throw new Error(result.message);
+                    
+                    document.getElementById('detailRefId').value = result.data.ref_id || '-';
+                    document.getElementById('detailNomor').value = result.data.destination;
+                    document.getElementById('detailNamaProduk').value = document.getElementById('modalNamaProduk').value;
+                    document.getElementById('detailHarga').value = document.getElementById('modalHarga').value;
+                    document.getElementById('detailStatus').value = (result.data.status || 'PENDING').toUpperCase();
+                    document.getElementById('detailMessage').value = result.data.message;
+                    
+                    buyView.style.display = 'none'; detailView.style.display = 'block';
+                    updateBalance();
+
+                    if (result.data.ref_id && !['success', 'failed'].includes(result.data.status)) {
+                        document.querySelector('#detailView .loading-line').style.display = 'block';
+                        startPolling(result.data.ref_id);
+                    } else document.querySelector('#detailView .loading-line').style.display = 'none';
+
+                } catch (error) {
+                    detailModal.style.display = 'none';
+                    showTxErrorModal(error.message);
+                } finally {
+                    buyButton.disabled = false; buyButton.textContent = 'Beli Sekarang';
+                }
+            });
+            
+            // Modal Management
+            const hideModal = () => { if (pollingInterval) clearInterval(pollingInterval); detailModal.style.display = 'none'; txErrorModal.style.display = 'none'; };
+            const showTxErrorModal = (msg) => { txErrorMessage.textContent = msg; txErrorModal.style.display = 'block'; };
+            
+            closeModalBtns.forEach(btn => btn.addEventListener('click', hideModal));
+            closeTxErrorModalBtn.addEventListener('click', hideModal);
+            window.addEventListener('click', (e) => { if ([detailModal, txErrorModal].includes(e.target)) hideModal(); });
+        });
+    </script>
+    
+    <script src="/js/sidebar.js"></script>
+    <script src="/js/theme.js"></script>
+    <script src="/js/submenu.js"></script>
+</body>
+</html>

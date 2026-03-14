@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - WUZZSTORE</title>
+    
+    <link rel="stylesheet" href="/css/style-variables.css">
+    <link rel="stylesheet" href="/css/style-layout.css">
+    <link rel="stylesheet" href="/css/style-components.css">
+    <link rel="stylesheet" href="/css/style-pages.css">
+    <link rel="stylesheet" href="/css/style-dark.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="dashboard">
+
+    <%- include('partials/sidebar', { user: user }) %>
+    <%- include('partials/header', { user: user }) %>
+
+    <main class="main-content">
+        <div class="announcement-card">
+            <h2><i class="fas fa-bullhorn"></i> Pengumuman</h2>
+            
+            <div id="announcement-text" class="info-box-blue" style="text-align: left; white-space: pre-wrap; min-height: 50px;">
+                Memuat pengumuman...
+            </div>
+            
+            <% if (user.isAdmin) { %>
+                <button id="edit-announcement-btn" class="edit-announcement-btn" title="Edit Pengumuman">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+            <% } %>
+        </div>
+
+        <div class="profile-card" style="margin-top: 20px;">
+            <h3>Selamat Datang, <%= user.username %>!</h3>
+            <p>Saldo Anda saat ini: <strong><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(user.balance || 0) %></strong></p>
+            <div style="margin-top: 15px;">
+                <a href="/topup" class="btn btn-small btn-success"><i class="fas fa-wallet"></i> Top Up</a>
+                <a href="/riwayat" class="btn btn-small btn-info"><i class="fas fa-history"></i> Riwayat</a>
+            </div>
+        </div>
+    </main>
+    
+    <div id="editAnnouncementModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close-btn">&times;</span>
+            <h3>Edit Pengumuman</h3>
+            <form id="editAnnouncementForm">
+                <div class="form-group">
+                    <label for="announcementInput">Isi Pengumuman</label>
+                    <textarea id="announcementInput" class="form-input" rows="6" placeholder="Tulis pengumuman disini..."></textarea>
+                </div>
+                <div class="modal-button-container">
+                    <button type="button" class="btn closeModalBtn btn-danger">Batal</button>
+                    <button type="submit" class="btn">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inisialisasi Elemen
+            const announcementText = document.getElementById('announcement-text');
+            const editBtn = document.getElementById('edit-announcement-btn');
+            const editModal = document.getElementById('editAnnouncementModal');
+            const editForm = document.getElementById('editAnnouncementForm');
+            const announcementInput = document.getElementById('announcementInput');
+            const closeModalBtns = document.querySelectorAll('.modal-close-btn, .closeModalBtn');
+
+            // 1. Fungsi Mengambil Pengumuman dari Server
+            const fetchAnnouncement = async () => {
+                try {
+                    const response = await fetch('/api/announcement');
+                    const result = await response.json();
+                    if (result.success) {
+                        // Jika kosong, beri pesan default
+                        announcementText.textContent = result.announcement || 'Belum ada pengumuman.';
+                    } else {
+                        announcementText.textContent = 'Gagal memuat pengumuman.';
+                    }
+                } catch (error) {
+                    announcementText.textContent = 'Gagal terhubung ke server.';
+                }
+            };
+            
+            // Jalankan saat halaman dimuat
+            fetchAnnouncement();
+
+            // 2. Logika Edit (Hanya jika tombol edit ada/Admin)
+            if (editBtn) {
+                editBtn.addEventListener('click', () => {
+                    // Isi textarea dengan teks saat ini
+                    announcementInput.value = announcementText.textContent;
+                    editModal.style.display = 'block';
+                });
+
+                editForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const newText = announcementInput.value;
+                    const saveButton = editForm.querySelector('button[type="submit"]');
+                    
+                    saveButton.disabled = true;
+                    saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+                    try {
+                        const response = await fetch('/api/admin/update-announcement', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ announcement: newText })
+                        });
+                        const result = await response.json();
+                        
+                        if (!response.ok) throw new Error(result.message);
+
+                        // Update tampilan tanpa refresh
+                        announcementText.textContent = newText;
+                        hideModal();
+                        alert('Pengumuman berhasil diperbarui!');
+                    } catch (error) {
+                        alert('Gagal menyimpan: ' + error.message);
+                    } finally {
+                        saveButton.disabled = false;
+                        saveButton.textContent = 'Simpan';
+                    }
+                });
+            }
+            
+            // 3. Manajemen Modal (Tutup)
+            const hideModal = () => {
+                editModal.style.display = 'none';
+            };
+            closeModalBtns.forEach(btn => btn.addEventListener('click', hideModal));
+            window.addEventListener('click', (e) => {
+                if(e.target === editModal) hideModal();
+            });
+        });
+    </script>
+    
+    <script src="/js/sidebar.js"></script>
+    <script src="/js/theme.js"></script>
+    <script src="/js/submenu.js"></script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi OTP - WUZZSTORE</title>
+    
+    <link rel="stylesheet" href="/css/style-variables.css">
+    <link rel="stylesheet" href="/css/style-auth.css">
+    <link rel="stylesheet" href="/css/style-components.css">
+</head>
+<body>
+    <div class="stars-bg">
+        <div class="stars"></div>
+        <div class="stars"></div>
+        <div class="stars"></div>
+    </div>
+
+    <div class="auth-container">
+        <h1 class="brand-title">WUZZSTORE</h1>
+        <h3 style="margin-bottom: 10px;">Verifikasi Email Anda</h3>
+        
+        <p style="font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5;">
+            Kami telah mengirimkan kode OTP ke email <br>
+            <span style="background: #eef; padding: 3px 8px; border-radius: 4px; color: #333; font-weight: bold;">
+                <%= email %>
+            </span><br>
+            Silakan cek kotak masuk atau folder spam Anda.
+        </p>
+
+        <div id="message-display" style="margin-bottom: 15px; font-weight: bold; text-align: center;"></div>
+
+        <form id="otpForm">
+            <div class="form-group">
+                <label for="otp" style="text-align: left;">Kode OTP (6 Digit)</label>
+                <input type="text" id="otp" name="otp" class="form-input" 
+                       placeholder="Contoh: 123456" required 
+                       maxlength="6" pattern="\d{6}" 
+                       style="text-align: center; letter-spacing: 5px; font-size: 1.2rem;">
+            </div>
+            <button type="submit" class="btn">Verifikasi</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const otpForm = document.getElementById('otpForm');
+            const messageDisplay = document.getElementById('message-display');
+            const submitButton = otpForm.querySelector('button');
+            const otpInput = document.getElementById('otp');
+
+            // Auto-focus ke input OTP
+            otpInput.focus();
+
+            // Hanya izinkan angka
+            otpInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            otpForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const otp = otpInput.value;
+
+                submitButton.disabled = true;
+                submitButton.textContent = 'Memverifikasi...';
+                messageDisplay.textContent = '';
+                messageDisplay.style.color = '';
+
+                try {
+                    const response = await fetch('/api/auth/complete-registration', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ otp })
+                    });
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.message || 'Terjadi kesalahan.');
+                    }
+
+                    // Sukses
+                    messageDisplay.style.color = '#5cb85c';
+                    messageDisplay.textContent = result.message;
+                    submitButton.style.display = 'none'; // Sembunyikan tombol
+                    
+                    // Redirect ke login setelah 3 detik
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 3000);
+
+                } catch (error) {
+                    // Gagal
+                    messageDisplay.style.color = '#d9534f';
+                    messageDisplay.textContent = 'Error: ' + error.message;
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Verifikasi';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
