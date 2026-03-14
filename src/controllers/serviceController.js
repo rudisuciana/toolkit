@@ -26,6 +26,11 @@ function loadAkrabData() {
 
 loadAkrabData();
 
+fs.watchFile(akrabJsonPath, { interval: 5000 }, () => {
+  logger.info('akrab.json berubah, memuat ulang data...');
+  loadAkrabData();
+});
+
 const xlRequestOtp = async (req, res) => {
   const { number } = req.body;
   const formattedNumber = ubahKe62(number);

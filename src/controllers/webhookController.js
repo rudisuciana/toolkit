@@ -175,7 +175,7 @@ const webhookKhfy = async (req, res) => {
     const RX =
       /RC=(?<reffid>[a-zA-Z0-9-]+)\s+TrxID=(?<trxid>\d+)\s+(?<produk>[A-Z0-9]+)\.(?<tujuan>\d+)\s+(?<status_text>[A-Za-z]+)\s*(?<keterangan>.+?)(?:\s+Saldo[\s\S]*?)?(?:\bresult=(?<status_code>\d+))?\s*>?$/i;
     const matchResult = message.match(RX);
-    if (!matchResult || !matchResult.groups) return res.status(400).json({ ok: false, error: 'format tidak dikenali' });
+    if (!matchResult || !matchResult.groups) return res.status(400).json({ success: false, message: 'Format tidak dikenali.' });
 
     const { trxid, reffid, status_text = '', status_code: statusCodeRaw } = matchResult.groups;
     const keterangan = (matchResult.groups.keterangan || '').trim();

@@ -88,8 +88,10 @@ async function emailReceiver() {
       const msgRes = await auth.users.messages.get({ userId: 'me', id: message.id });
       const snippet = msgRes.data.snippet;
       try {
-        const protocol = config.DOMAIN.includes('localhost') ? 'http' : 'https';
-        await axios.post(`${protocol}://${config.DOMAIN}/webhook_topup`, { text: snippet });
+        const isLocal = config.DOMAIN.includes('localhost') || /^(\d{1,3}\.){3}\d{1,3}$/.test(config.DOMAIN);
+        const protocol = isLocal ? 'http' : 'https';
+        const host = isLocal ? `${config.DOMAIN}:${config.PORT}` : config.DOMAIN;
+        await axios.post(`${protocol}://${host}/webhook_topup`, { text: snippet });
         await auth.users.messages.modify({
           userId: 'me',
           id: message.id,
