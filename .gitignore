@@ -1,3 +1,6 @@
+node_modules/
+dist/
+.env
 .vars.json
-github
-webhook_topup/.env
+logs/
+*.log
