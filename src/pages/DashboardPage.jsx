@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 function DashboardPage({ user }) {
   const [announcement, setAnnouncement] = useState('');
@@ -46,10 +47,10 @@ function DashboardPage({ user }) {
           { label: 'No OTP', href: '/no-otp', icon: '📱' },
           { label: 'Cek Paket', href: '/cek-paket', icon: '🔍' },
         ].map((item) => (
-          <a key={item.href} href={item.href} className="bg-darker rounded-xl p-4 border border-gray-700 hover:border-primary transition-colors text-center">
+          <Link key={item.href} to={item.href} className="bg-darker rounded-xl p-4 border border-gray-700 hover:border-primary transition-colors text-center">
             <div className="text-3xl mb-2">{item.icon}</div>
             <p className="text-white text-sm font-medium">{item.label}</p>
-          </a>
+          </Link>
         ))}
       </div>
     </div>

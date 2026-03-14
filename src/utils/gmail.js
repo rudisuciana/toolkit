@@ -25,7 +25,7 @@ function createRawEmail(destination, subject, message) {
 
 async function sendOTP(email, otp) {
   try {
-    const auth = getAuth(config.GMAIL.CLIENT_ID, config.GMAIL.CLIENT_SECRET, config.GMAIL.REDIRECT_URI, config.GMAIL.SENDER);
+    const auth = getAuth(config.GMAIL.CLIENT_ID, config.GMAIL.CLIENT_SECRET, config.GMAIL.REDIRECT_URI, config.GMAIL.SENDER_REFRESH_TOKEN);
     const pesan = `
       <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
         <h2>Verifikasi Akun WUZZSTORE</h2>
@@ -45,7 +45,7 @@ async function sendOTP(email, otp) {
 }
 
 async function sendResetLinkEmail(email, token) {
-  const auth = getAuth(config.GMAIL.CLIENT_ID, config.GMAIL.CLIENT_SECRET, config.GMAIL.REDIRECT_URI, config.GMAIL.SENDER);
+  const auth = getAuth(config.GMAIL.CLIENT_ID, config.GMAIL.CLIENT_SECRET, config.GMAIL.REDIRECT_URI, config.GMAIL.SENDER_REFRESH_TOKEN);
   const ipRegex = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
   let resetLink;
   if (ipRegex.test(config.DOMAIN)) {
@@ -72,7 +72,7 @@ async function sendResetLinkEmail(email, token) {
 }
 
 async function emailReceiver() {
-  const auth = getAuth(config.GMAIL.CLIENT_ID, config.GMAIL.CLIENT_SECRET, config.GMAIL.REDIRECT_URI, config.GMAIL.RECEIVER);
+  const auth = getAuth(config.GMAIL.CLIENT_ID, config.GMAIL.CLIENT_SECRET, config.GMAIL.REDIRECT_URI, config.GMAIL.RECEIVER_REFRESH_TOKEN);
   try {
     const listRes = await auth.users.messages.list({
       userId: 'me',
@@ -96,10 +96,11 @@ async function emailReceiver() {
           requestBody: { removeLabelIds: ['UNREAD'] },
         });
       } catch (err) {
-        throw new Error('Gagal mengirim pesan ke webhook');
+        logger.error(`Gagal memproses email ${message.id}: ${err.message}`);
       }
     }
   } catch (err) {
+    logger.error('Gagal membaca pesan email: ' + err.message);
     throw new Error('Gagal membaca pesan');
   }
 }

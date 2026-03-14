@@ -83,7 +83,7 @@ const createTableQueries = [
   `
   CREATE TABLE IF NOT EXISTS \`no_otp\` (
     \`id\` INT PRIMARY KEY AUTO_INCREMENT,
-    \`product_id\` INT NOT NULL,
+    \`product_id\` INT NOT NULL UNIQUE,
     \`product_name\` TEXT NOT NULL,
     \`amount\` DECIMAL(15, 2) NOT NULL,
     \`category\` TEXT NOT NULL,

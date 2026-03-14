@@ -12,6 +12,20 @@ const { requestOtp, loginOtp, checkSession, checkQuotas, getProducts, buyPackage
 const { getAkrabStockFlaz, inviteAkrabMember } = require('../utils/providers/flaz');
 const { getProductKhfy, orderProductKhfy } = require('../utils/providers/khfy');
 
+const akrabJsonPath = path.join(__dirname, '..', '..', 'akrab.json');
+let cachedAkrabData = null;
+
+function loadAkrabData() {
+  try {
+    cachedAkrabData = JSON.parse(fs.readFileSync(akrabJsonPath, 'utf-8'));
+  } catch (err) {
+    logger.error('Gagal memuat akrab.json: ' + err.message);
+    cachedAkrabData = [];
+  }
+}
+
+loadAkrabData();
+
 const xlRequestOtp = async (req, res) => {
   const { number } = req.body;
   const formattedNumber = ubahKe62(number);
@@ -232,11 +246,9 @@ const xlStockKhfy = async (req, res) => {
     const productData = await getProductKhfy(config);
     if (!productData.ok || !Array.isArray(productData.data)) throw new Error(productData.message || 'Gagal mengambil data stok.');
 
-    const akrabJsonPath = path.join(__dirname, '..', '..', 'akrab.json');
-    const localAkrabData = JSON.parse(fs.readFileSync(akrabJsonPath, 'utf-8'));
     const mergedData = productData.data
       .map((liveProduct) => {
-        const localDetails = localAkrabData.find((localProduct) => localProduct.code === liveProduct.type);
+        const localDetails = cachedAkrabData.find((localProduct) => localProduct.code === liveProduct.type);
         return localDetails ? { ...liveProduct, ...localDetails, nama: liveProduct.nama } : liveProduct;
       })
       .filter((p) => p.harga !== undefined);
@@ -257,9 +269,7 @@ const xlAkrabV3Order = async (req, res) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    const akrabJsonPath = path.join(__dirname, '..', '..', 'akrab.json');
-    const localAkrabData = JSON.parse(fs.readFileSync(akrabJsonPath, 'utf-8'));
-    const product = localAkrabData.find((p) => p.code === code);
+    const product = cachedAkrabData.find((p) => p.code === code);
     if (!product) throw new Error('Produk tidak ditemukan.');
 
     const price = product.harga;

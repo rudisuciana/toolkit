@@ -12,12 +12,12 @@ const PORT = config.PORT;
 
 const sessionStore = new MySQLStore({}, pool);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
-  secret: config.SECRET.JWT || 'fallback-secret-key',
+  secret: config.SECRET.JWT,
   store: sessionStore,
   resave: false,
   saveUninitialized: false,

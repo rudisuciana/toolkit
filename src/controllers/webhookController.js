@@ -146,10 +146,9 @@ const webhookFlaz = async (req, res) => {
       await userRepository.addBalance(connection, originalTx.user_id, originalTx.price);
     }
 
-    await connection.execute(
-      'UPDATE transactions SET status = ?, serial_number = ?, updated_at = ?, message = ? WHERE trx_id = ?',
-      [finalStatus, finalSn, now, finalMessage, trx_id]
-    );
+    await transactionRepository.updateStatusByTrxId(connection, {
+      status: finalStatus, serialNumber: finalSn, updatedAt: now, paymentInfo: null, message: finalMessage, trxId: trx_id,
+    });
 
     await connection.commit();
     res.status(200).json({ success: true, message: 'Webhook Flaz received.' });
@@ -176,7 +175,7 @@ const webhookKhfy = async (req, res) => {
     const RX =
       /RC=(?<reffid>[a-zA-Z0-9-]+)\s+TrxID=(?<trxid>\d+)\s+(?<produk>[A-Z0-9]+)\.(?<tujuan>\d+)\s+(?<status_text>[A-Za-z]+)\s*(?<keterangan>.+?)(?:\s+Saldo[\s\S]*?)?(?:\bresult=(?<status_code>\d+))?\s*>?$/i;
     const matchResult = message.match(RX);
-    if (!matchResult || !matchResult.groups) return res.status(200).json({ ok: false, error: 'format tidak dikenali' });
+    if (!matchResult || !matchResult.groups) return res.status(400).json({ ok: false, error: 'format tidak dikenali' });
 
     const { trxid, reffid, status_text = '', status_code: statusCodeRaw } = matchResult.groups;
     const keterangan = (matchResult.groups.keterangan || '').trim();
