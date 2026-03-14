@@ -88,7 +88,8 @@ async function emailReceiver() {
       const msgRes = await auth.users.messages.get({ userId: 'me', id: message.id });
       const snippet = msgRes.data.snippet;
       try {
-        await axios.post(`https://${config.DOMAIN}/webhook_topup`, { text: snippet });
+        const protocol = config.DOMAIN.includes('localhost') ? 'http' : 'https';
+        await axios.post(`${protocol}://${config.DOMAIN}/webhook_topup`, { text: snippet });
         await auth.users.messages.modify({
           userId: 'me',
           id: message.id,

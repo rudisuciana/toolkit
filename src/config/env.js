@@ -46,6 +46,7 @@ const env = {
   },
   DOMAIN: process.env.DOMAIN || 'localhost',
   PORT: parseInt(process.env.PORT, 10) || 3002,
+  CHECK_PACKAGE_URL: process.env.CHECK_PACKAGE_URL || 'https://bendith.my.id/end.php',
   JAGO: process.env.JAGO || '',
   SEABANK: process.env.SEABANK || '',
   DATAQRIS: process.env.DATAQRIS || '',

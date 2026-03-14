@@ -172,6 +172,7 @@ const webhookKhfy = async (req, res) => {
     const message = (req.query && req.query.message) || (typeof req.body?.message === 'string' ? req.body.message : null);
     if (!message) return res.status(400).json({ ok: false, error: 'message kosong' });
 
+    // Format: RC=<ref_id> TrxID=<trx_id> <PRODUK>.<TUJUAN> <STATUS_TEXT> <KETERANGAN> [Saldo...] [result=<status_code>]
     const RX =
       /RC=(?<reffid>[a-zA-Z0-9-]+)\s+TrxID=(?<trxid>\d+)\s+(?<produk>[A-Z0-9]+)\.(?<tujuan>\d+)\s+(?<status_text>[A-Za-z]+)\s*(?<keterangan>.+?)(?:\s+Saldo[\s\S]*?)?(?:\bresult=(?<status_code>\d+))?\s*>?$/i;
     const matchResult = message.match(RX);

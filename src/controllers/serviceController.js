@@ -343,7 +343,7 @@ const checkPackage = async (req, res) => {
   if (!number) return res.status(400).json({ success: false, message: 'Nomor tidak boleh kosong.' });
   try {
     const formattedNumber = ubahKe62(number);
-    const response = await axios.get(`https://bendith.my.id/end.php?check=package&number=${formattedNumber}&version=2`);
+    const response = await axios.get(`${config.CHECK_PACKAGE_URL}?check=package&number=${formattedNumber}&version=2`);
     if (response.data && response.data.success) {
       res.json(response.data);
     } else {

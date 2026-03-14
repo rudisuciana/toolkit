@@ -4,11 +4,11 @@ const mysql = require('mysql2/promise');
 console.log('Memulai skrip setup database MySQL...');
 
 const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  port: parseInt(process.env.DB_PORT || '3306'),
-  database: process.env.DB_NAME || 'wuzzstore',
+  host: process.env.MYSQL_HOST || 'localhost',
+  user: process.env.MYSQL_USERNAME || 'root',
+  password: process.env.MYSQL_PASSWORD || '',
+  port: parseInt(process.env.MYSQL_PORT || '3306'),
+  database: process.env.MYSQL_DATABASE || 'wuzzstore',
 };
 
 const createTableQueries = [
